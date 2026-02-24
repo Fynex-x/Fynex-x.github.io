@@ -12,8 +12,6 @@
             --nt-bg: #050a10;
             --nt-alert: #ff3333;
             --nt-warn: #ffcc00;
-            --scanline-color: rgba(0, 255, 255, 0.05);
-            --glass-reflection: rgba(255, 255, 255, 0.02);
         }
 
         * {
@@ -35,7 +33,6 @@
             position: relative;
         }
 
-        /* --- Эффекты ЭЛТ монитора (CRT) --- */
         .crt-overlay {
             position: fixed;
             top: 0;
@@ -58,7 +55,6 @@
             100% { opacity: 0.97; }
         }
 
-        /* --- Корпус Консоли --- */
         .console-frame {
             width: 1000px;
             max-width: 95%;
@@ -68,15 +64,9 @@
             border: 1px solid var(--nt-blue);
             box-shadow: 0 0 30px rgba(0, 240, 255, 0.15), inset 0 0 20px rgba(0, 240, 255, 0.1);
             display: grid;
-            grid-template-rows: 40px 1fr 50px; /* Хедер, Контент, Футер */
+            grid-template-rows: 40px 1fr 50px;
             position: relative;
-            clip-path: polygon(
-                0 0, 
-                100% 0, 
-                100% calc(100% - 20px), 
-                calc(100% - 20px) 100%, 
-                0 100%
-            ); /* Срезанный уголок */
+            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%);
             opacity: 0;
             transform: scale(0.95);
             transition: opacity 0.5s ease-out, transform 0.5s ease-out;
@@ -87,7 +77,6 @@
             transform: scale(1);
         }
 
-        /* --- Загрузочный экран --- */
         #boot-screen {
             position: absolute;
             top: 0;
@@ -122,7 +111,6 @@
             transition: width 0.1s linear;
         }
 
-        /* --- Хедер --- */
         .header {
             border-bottom: 1px solid var(--nt-dark);
             display: flex;
@@ -132,23 +120,17 @@
             font-size: 12px;
             background: rgba(0, 240, 255, 0.05);
         }
-        .header-left span {
-            margin-right: 15px;
-            font-weight: bold;
-        }
         .nt-logo {
             letter-spacing: 2px;
             text-shadow: 0 0 5px var(--nt-blue);
         }
 
-        /* --- Основная раскладка --- */
         .main-interface {
             display: grid;
             grid-template-columns: 250px 1fr;
             overflow: hidden;
         }
 
-        /* --- Боковая панель --- */
         .sidebar {
             border-right: 1px solid var(--nt-dark);
             display: flex;
@@ -167,18 +149,12 @@
             overflow: hidden;
             background: #000;
         }
-        
-        /* Заглушка аватара (генерация через CSS) */
         .avatar-placeholder {
             width: 100%;
             height: 100%;
             background: radial-gradient(circle at 50% 30%, #553322, #1a1a1a);
-            display: flex;
-            justify-content: center;
-            align-items: flex-end;
             position: relative;
         }
-        /* Уши лиса (CSS) */
         .ear {
             position: absolute;
             top: -10px;
@@ -208,6 +184,7 @@
             100% { top: 100%; opacity: 0; }
         }
 
+        /* Стилизация кнопок */
         .nav-buttons {
             width: 100%;
             display: flex;
@@ -253,20 +230,13 @@
             font-weight: bold;
         }
 
-        /* --- Область контента --- */
         .content-area {
             padding: 30px;
             overflow-y: auto;
             position: relative;
         }
-        
-        /* Кастумный скроллбар */
-        .content-area::-webkit-scrollbar {
-            width: 8px;
-        }
-        .content-area::-webkit-scrollbar-track {
-            background: #020508;
-        }
+        .content-area::-webkit-scrollbar { width: 8px; }
+        .content-area::-webkit-scrollbar-track { background: #020508; }
         .content-area::-webkit-scrollbar-thumb {
             background: var(--nt-dark);
             border: 1px solid var(--nt-blue);
@@ -293,14 +263,12 @@
             50% { box-shadow: 0 0 15px var(--nt-alert); }
         }
 
-        /* Стили для вывода текста */
         .typewriter-text {
             line-height: 1.6;
             font-size: 14px;
             white-space: pre-wrap;
             color: rgba(0, 240, 255, 0.9);
         }
-        
         .cursor-block {
             display: inline-block;
             width: 8px;
@@ -309,8 +277,8 @@
             animation: blink 1s step-end infinite;
             vertical-align: middle;
         }
+        @keyframes blink { 0%, 100% { background-color: var(--nt-blue); } 50% { background-color: transparent; } }
 
-        /* Сетка для данных */
         .data-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -331,7 +299,6 @@
             color: #fff;
         }
 
-        /* --- Футер --- */
         .footer {
             border-top: 1px solid var(--nt-dark);
             display: flex;
@@ -350,17 +317,12 @@
             margin-right: 5px;
             box-shadow: 0 0 5px #0f0;
         }
-        
-        .hidden { display: none !important; }
-
     </style>
 </head>
 <body>
 
-    <!-- Эффект экрана -->
     <div class="crt-overlay"></div>
 
-    <!-- Экран загрузки -->
     <div id="boot-screen">
         <div style="margin-bottom: 10px;">NANOTRASEEN OS v4.9.2</div>
         <div id="boot-log">INITIALIZING KERNEL...</div>
@@ -369,7 +331,6 @@
         </div>
     </div>
 
-    <!-- Основной интерфейс -->
     <div class="console-frame" id="main-interface">
         <header class="header">
             <div class="header-left">
@@ -382,7 +343,6 @@
         </header>
 
         <div class="main-interface">
-            <!-- Левая панель -->
             <aside class="sidebar">
                 <div class="avatar-box">
                     <div class="ear left"></div>
@@ -396,17 +356,13 @@
                     <div style="font-size: 10px; color: var(--nt-blue);">ОФИЦЕР ЦК</div>
                 </div>
 
-                <div class="nav-buttons">
-                    <button class="nav-btn active" data-target="personal">01. ПЕРСОНАЛЬНЫЕ ДАННЫЕ</button>
-                    <button class="nav-btn" data-target="bio">02. БИОГРАФИЯ</button>
-                    <button class="nav-btn" data-target="analysis">03. ПСИХОЛОГИЧЕСКИЙ АНАЛИЗ</button>
+                <!-- КОНТЕЙНЕР ДЛЯ ДИНАМИЧЕСКИХ КНОПОК -->
+                <div id="nav-container" class="nav-buttons">
+                    <!-- Кнопки появятся здесь автоматически -->
                 </div>
             </aside>
 
-            <!-- Правая панель (Контент) -->
-            <main class="content-area" id="content-display">
-                <!-- Содержимое генерируется через JS -->
-            </main>
+            <main class="content-area" id="content-display"></main>
         </div>
 
         <footer class="footer">
@@ -416,12 +372,12 @@
     </div>
 
 <script>
-    // Глобальная переменная для данных
-    let globalData = {};
+    // Глобальная переменная для хранения списка вкладок
+    let tabsData = [];
     const contentDisplay = document.getElementById('content-display');
-    const buttons = document.querySelectorAll('.nav-btn');
+    const navContainer = document.getElementById('nav-container');
+    let activeButton = null;
 
-    // Часы
     function updateClock() {
         const now = new Date();
         document.getElementById('system-clock').innerText = now.toLocaleTimeString('ru-RU');
@@ -429,81 +385,86 @@
     setInterval(updateClock, 1000);
     updateClock();
 
-    // Загрузка данных из файла data.json
+    // Загрузка данных
     async function loadData() {
         try {
-            const response = await fetch('/data.json');
-            if (!response.ok) {
-                throw new Error("Ошибка загрузки файла");
-            }
-            globalData = await response.json();
-            
-            // Данные загружены успешно, запускаем анимацию загрузки
-            startBootSequence(); 
+            const response = await fetch('data.json');
+            if (!response.ok) throw new Error("Ошибка загрузки");
+            tabsData = await response.json();
+            startBootSequence();
         } catch (error) {
-            console.error('Ошибка:', error);
-            document.body.innerHTML = `<div style="color:red; text-align:center; padding:50px; font-family: monospace;">КРИТИЧЕСКАЯ ОШИБКА:<br>Не удалось загрузить базу данных (data.json).<br><br>1. Убедитесь, что файл data.json лежит в той же папке, что и этот HTML.<br>2. Запустите через локальный сервер (Live Server), так как браузеры блокируют загрузку файлов напрямую.</div>`;
+            console.error(error);
+            document.body.innerHTML = `<div style="color:red; text-align:center; padding:50px; font-family: monospace;">ОШИБКА: Не удалось загрузить data.json.<br>Запустите через локальный сервер (Live Server).</div>`;
         }
     }
 
-    // Анимация загрузки
+    // Создание кнопок на основе данных
+    function renderButtons() {
+        navContainer.innerHTML = ''; // Очистка
+
+        tabsData.forEach((item, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'nav-btn';
+            btn.innerText = item.title;
+            
+            // Клик по кнопке
+            btn.addEventListener('click', () => {
+                loadContent(index);
+            });
+
+            // Первая кнопка активна
+            if (index === 0) {
+                btn.classList.add('active');
+                activeButton = btn;
+            }
+
+            navContainer.appendChild(btn);
+        });
+    }
+
     function startBootSequence() {
+        // Сначала создаем кнопки (они появятся после загрузки)
+        renderButtons();
+
         const log = document.getElementById('boot-log');
         const bar = document.getElementById('boot-progress');
         const bootScreen = document.getElementById('boot-screen');
         const mainInterface = document.getElementById('main-interface');
         
-        const steps = [
-            "CHECKING MEMORY INTEGRITY...",
-            "LOADING NANOTRASEEN PROTOCOLS...",
-            "CONNECTING TO SECURE DATABASE...",
-            "DECRYPTING PERSONNEL FILES...",
-            "ACCESS GRANTED."
-        ];
-
+        const steps = ["CHECKING MEMORY...", "LOADING OS...", "CONNECTING DB...", "DECRYPTING...", "ACCESS GRANTED."];
         let step = 0;
         let progress = 0;
-
+        
         const bootInterval = setInterval(() => {
             progress += Math.random() * 5;
             if(progress > 100) progress = 100;
             bar.style.width = progress + "%";
 
-            // Обновляем текст лога по мере прогресса
             if (progress > (step + 1) * 20 && step < steps.length) {
                 log.innerText = steps[step];
                 step++;
             }
 
-            // Завершение загрузки
             if (progress >= 100) {
                 clearInterval(bootInterval);
-                
-                // Гарантированно показываем последний статус
                 log.innerText = steps[steps.length - 1];
-                bar.style.width = "100%";
-
                 setTimeout(() => {
-                    // Плавное исчезновение загрузчика
                     bootScreen.style.opacity = '0';
                     setTimeout(() => {
                         bootScreen.style.display = 'none';
                         mainInterface.classList.add('active');
-                        // Запуск первой вкладки
-                        loadContent('personal');
-                    }, 500); // Время исчезновения экрана загрузки
+                        // Загружаем первую вкладку (индекс 0)
+                        loadContent(0);
+                    }, 500);
                 }, 500);
             }
         }, 100);
     }
 
-    // Эффект печати текста
     function typeWriter(htmlContent, callback) {
         contentDisplay.innerHTML = '';
-        
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = htmlContent;
-        
         const container = document.createElement('div');
         container.className = 'typewriter-text';
         contentDisplay.appendChild(container);
@@ -511,14 +472,12 @@
         const allTextNodes = getTextNodes(container);
         let currentNodeIndex = 0;
         let charIndex = 0;
-        
         allTextNodes.forEach(node => node.nodeValue = '');
 
         function type() {
             if (currentNodeIndex < allTextNodes.length) {
                 const node = allTextNodes[currentNodeIndex];
                 const text = node.nodeValue;
-                
                 if (charIndex < text.length) {
                     node.nodeValue = text.substring(0, charIndex + 1);
                     charIndex++;
@@ -536,34 +495,26 @@
                 if (callback) callback();
             }
         }
-        
         type();
     }
 
-    // Вспомогательная функция для получения всех текстовых узлов
     function getTextNodes(elem) {
         let textNodes = [];
         (function walk(elem) {
-            if (elem.nodeType === 3 && elem.nodeValue.trim().length > 0) {
-                textNodes.push(elem);
-            } else {
-                for (let i = 0; i < elem.childNodes.length; i++) {
-                    walk(elem.childNodes[i]);
-                }
-            }
+            if (elem.nodeType === 3 && elem.nodeValue.trim().length > 0) textNodes.push(elem);
+            else for (let i = 0; i < elem.childNodes.length; i++) walk(elem.childNodes[i]);
         })(elem);
         return textNodes;
     }
 
-    // Переключение вкладок
-    function loadContent(key) {
-        const item = globalData[key]; // Берем данные из переменной
+    function loadContent(index) {
+        const item = tabsData[index];
         if (!item) return;
 
-        buttons.forEach(btn => {
-            if (btn.dataset.target === key) btn.classList.add('active');
-            else btn.classList.remove('active');
-        });
+        // Обновляем активную кнопку
+        const buttons = navContainer.querySelectorAll('.nav-btn');
+        buttons.forEach(btn => btn.classList.remove('active'));
+        if(buttons[index]) buttons[index].classList.add('active');
 
         let classBadge = item.classified ? '<span class="classification">СЕКРЕТНО</span>' : '';
         const html = `
@@ -573,21 +524,10 @@
             </div>
             ${item.content}
         `;
-
         typeWriter(html);
     }
 
-    buttons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            loadContent(btn.dataset.target);
-        });
-    });
-
-    // Запуск процесса при загрузке страницы
-    window.onload = function() {
-        loadData(); // Сначала грузим данные
-    };
-
+    window.onload = loadData;
 </script>
 </body>
 </html>
