@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NT-TERM // KARIN TYLVISK</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --nt-blue: #00f0ff;
+            --nt-dark: #005f6b;
+            --nt-bg: #050a10;
+            --nt-alert: #ff3333;
+            --nt-warn: #ffcc00;
+            --scanline-color: rgba(0, 255, 255, 0.05);
+            --glass-reflection: rgba(255, 255, 255, 0.02);
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            color: var(--nt-blue);
+            font-family: 'Share Tech Mono', monospace;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* --- Эффекты ЭЛТ монитора (CRT) --- */
+        .crt-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: 
+                linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+                linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 2px, 3px 100%;
+            z-index: 999;
+            box-shadow: inset 0 0 100px rgba(0,0,0,0.9);
+            animation: flicker 0.15s infinite;
+        }
+
+        @keyframes flicker {
+            0% { opacity: 0.97; }
+            50% { opacity: 0.9; }
+            100% { opacity: 0.97; }
+        }
+
+        /* --- Корпус Консоли --- */
+        .console-frame {
+            width: 1000px;
+            max-width: 95%;
+            height: 650px;
+            max-height: 95%;
+            background-color: var(--nt-bg);
+            border: 1px solid var(--nt-blue);
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.15), inset 0 0 20px rgba(0, 240, 255, 0.1);
+            display: grid;
+            grid-template-rows: 40px 1fr 50px; /* Хедер, Контент, Футер */
+            position: relative;
+            clip-path: polygon(
+                0 0, 
+                100% 0, 
+                100% calc(100% - 20px), 
+                calc(100% - 20px) 100%, 
+                0 100%
+            ); /* Срезанный уголок */
+            opacity: 0;
+            transform: scale(0.95);
+            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+        }
+
+        .console-frame.active {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* --- Загрузочный экран --- */
+        #boot-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--nt-bg);
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            transition: opacity 0.5s;
+        }
+        .loader-bar {
+            width: 300px;
+            height: 4px;
+            background: #111;
+            margin-top: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        .loader-progress {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 0%;
+            background-color: var(--nt-blue);
+            box-shadow: 0 0 10px var(--nt-blue);
+            transition: width 0.1s linear;
+        }
+
+        /* --- Хедер --- */
+        .header {
+            border-bottom: 1px solid var(--nt-dark);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 15px;
+            font-size: 12px;
+            background: rgba(0, 240, 255, 0.05);
+        }
+        .header-left span {
+            margin-right: 15px;
+            font-weight: bold;
+        }
+        .nt-logo {
+            letter-spacing: 2px;
+            text-shadow: 0 0 5px var(--nt-blue);
+        }
+
+        /* --- Основная раскладка --- */
+        .main-interface {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            overflow: hidden;
+        }
+
+        /* --- Боковая панель --- */
+        .sidebar {
+            border-right: 1px solid var(--nt-dark);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            background: rgba(0,0,0,0.3);
+        }
+
+        .avatar-box {
+            width: 150px;
+            height: 150px;
+            border: 2px solid var(--nt-blue);
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+            background: #000;
+        }
+        
+        /* Заглушка аватара (генерация через CSS) */
+        .avatar-placeholder {
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 30%, #553322, #1a1a1a);
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            position: relative;
+        }
+        /* Уши лиса (CSS) */
+        .ear {
+            position: absolute;
+            top: -10px;
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-bottom: 40px solid #553322;
+        }
+        .ear.left { left: 10px; transform: rotate(-20deg); }
+        .ear.right { right: 10px; transform: rotate(20deg); }
+
+        .scan-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background-color: rgba(0, 240, 255, 0.5);
+            animation: scan 2s linear infinite;
+            box-shadow: 0 0 10px var(--nt-blue);
+        }
+        @keyframes scan {
+            0% { top: 0; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+
+        .nav-buttons {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            background: transparent;
+            border: 1px solid var(--nt-dark);
+            color: rgba(0, 240, 255, 0.6);
+            padding: 10px;
+            text-align: left;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            font-size: 12px;
+        }
+        .nav-btn::before {
+            content: '>';
+            position: absolute;
+            left: -20px;
+            transition: left 0.2s;
+            color: var(--nt-blue);
+        }
+        .nav-btn:hover {
+            background: rgba(0, 240, 255, 0.1);
+            border-color: var(--nt-blue);
+            color: var(--nt-blue);
+            padding-left: 15px;
+        }
+        .nav-btn:hover::before {
+            left: 5px;
+        }
+        .nav-btn.active {
+            background: var(--nt-blue);
+            color: #000;
+            border-color: var(--nt-blue);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+            font-weight: bold;
+        }
+
+        /* --- Область контента --- */
+        .content-area {
+            padding: 30px;
+            overflow-y: auto;
+            position: relative;
+        }
+        
+        /* Кастумный скроллбар */
+        .content-area::-webkit-scrollbar {
+            width: 8px;
+        }
+        .content-area::-webkit-scrollbar-track {
+            background: #020508;
+        }
+        .content-area::-webkit-scrollbar-thumb {
+            background: var(--nt-dark);
+            border: 1px solid var(--nt-blue);
+        }
+
+        .section-title {
+            border-bottom: 2px solid var(--nt-blue);
+            padding-bottom: 5px;
+            margin-bottom: 20px;
+            font-size: 18px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .classification {
+            font-size: 10px;
+            background: var(--nt-alert);
+            color: #000;
+            padding: 2px 6px;
+            border-radius: 2px;
+            animation: pulse-red 2s infinite;
+        }
+        @keyframes pulse-red {
+            0%, 100% { box-shadow: 0 0 5px var(--nt-alert); }
+            50% { box-shadow: 0 0 15px var(--nt-alert); }
+        }
+
+        /* Стили для вывода текста */
+        .typewriter-text {
+            line-height: 1.6;
+            font-size: 14px;
+            white-space: pre-wrap;
+            color: rgba(0, 240, 255, 0.9);
+        }
+        
+        .cursor-block {
+            display: inline-block;
+            width: 8px;
+            height: 16px;
+            background-color: var(--nt-blue);
+            animation: blink 1s step-end infinite;
+            vertical-align: middle;
+        }
+
+        /* Сетка для данных */
+        .data-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .data-item {
+            border: 1px dashed var(--nt-dark);
+            padding: 10px;
+        }
+        .data-label {
+            font-size: 10px;
+            color: rgba(0, 240, 255, 0.5);
+            display: block;
+            margin-bottom: 4px;
+        }
+        .data-value {
+            font-size: 14px;
+            color: #fff;
+        }
+
+        /* --- Футер --- */
+        .footer {
+            border-top: 1px solid var(--nt-dark);
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            font-size: 11px;
+            color: rgba(0, 240, 255, 0.5);
+            justify-content: space-between;
+        }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #0f0;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+            box-shadow: 0 0 5px #0f0;
+        }
+        
+        .hidden { display: none !important; }
+
+    </style>
+</head>
+<body>
+
+    <!-- Эффект экрана -->
+    <div class="crt-overlay"></div>
+
+    <!-- Экран загрузки -->
+    <div id="boot-screen">
+        <div style="margin-bottom: 10px;">NANOTRASEEN OS v4.9.2</div>
+        <div id="boot-log">INITIALIZING KERNEL...</div>
+        <div class="loader-bar">
+            <div class="loader-progress" id="boot-progress"></div>
+        </div>
+    </div>
+
+    <!-- Основной интерфейс -->
+    <div class="console-frame" id="main-interface">
+        <header class="header">
+            <div class="header-left">
+                <span class="nt-logo">NANOTRASEEN</span>
+                <span id="system-clock">00:00:00</span>
+            </div>
+            <div class="header-right">
+                ID: 884-KT-ALPHA <span style="color:var(--nt-alert)">[RESTRICTED]</span>
+            </div>
+        </header>
+
+        <div class="main-interface">
+            <!-- Левая панель -->
+            <aside class="sidebar">
+                <div class="avatar-box">
+                    <div class="ear left"></div>
+                    <div class="ear right"></div>
+                    <div class="avatar-placeholder"></div>
+                    <div class="scan-overlay"></div>
+                </div>
+                
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <div style="font-size: 18px; color: #fff; text-shadow: 0 0 5px var(--nt-blue);">КАРИН ТАЙЛВИСК</div>
+                    <div style="font-size: 10px; color: var(--nt-blue);">ОФИЦЕР ЦК</div>
+                </div>
+
+                <div class="nav-buttons">
+                    <button class="nav-btn active" data-target="personal">01. ПЕРСОНАЛЬНЫЕ ДАННЫЕ</button>
+                    <button class="nav-btn" data-target="bio">02. БИОГРАФИЯ</button>
+                    <button class="nav-btn" data-target="analysis">03. ПСИХОЛОГИЧЕСКИЙ АНАЛИЗ</button>
+                </div>
+            </aside>
+
+            <!-- Правая панель (Контент) -->
+            <main class="content-area" id="content-display">
+                <!-- Содержимое генерируется через JS -->
+            </main>
+        </div>
+
+        <footer class="footer">
+            <div><span class="status-dot"></span>TERMINAL CONNECTED // SECURE LINK</div>
+            <div>CPU: 2% // MEM: 128TB</div>
+        </footer>
+    </div>
+
+<script>
+    // Глобальная переменная для данных
+    let globalData = {};
+    const contentDisplay = document.getElementById('content-display');
+    const buttons = document.querySelectorAll('.nav-btn');
+
+    // Часы
+    function updateClock() {
+        const now = new Date();
+        document.getElementById('system-clock').innerText = now.toLocaleTimeString('ru-RU');
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Загрузка данных из файла data.json
+    async function loadData() {
+        try {
+            const response = await fetch('data.json');
+            if (!response.ok) {
+                throw new Error("Ошибка загрузки файла");
+            }
+            globalData = await response.json();
+            
+            // Данные загружены успешно, запускаем анимацию загрузки
+            startBootSequence(); 
+        } catch (error) {
+            console.error('Ошибка:', error);
+            document.body.innerHTML = `<div style="color:red; text-align:center; padding:50px; font-family: monospace;">КРИТИЧЕСКАЯ ОШИБКА:<br>Не удалось загрузить базу данных (data.json).<br><br>1. Убедитесь, что файл data.json лежит в той же папке, что и этот HTML.<br>2. Запустите через локальный сервер (Live Server), так как браузеры блокируют загрузку файлов напрямую.</div>`;
+        }
+    }
+
+    // Анимация загрузки
+    function startBootSequence() {
+        const log = document.getElementById('boot-log');
+        const bar = document.getElementById('boot-progress');
+        const bootScreen = document.getElementById('boot-screen');
+        const mainInterface = document.getElementById('main-interface');
+        
+        const steps = [
+            "CHECKING MEMORY INTEGRITY...",
+            "LOADING NANOTRASEEN PROTOCOLS...",
+            "CONNECTING TO SECURE DATABASE...",
+            "DECRYPTING PERSONNEL FILES...",
+            "ACCESS GRANTED."
+        ];
+
+        let step = 0;
+        let progress = 0;
+
+        const bootInterval = setInterval(() => {
+            progress += Math.random() * 5;
+            if(progress > 100) progress = 100;
+            bar.style.width = progress + "%";
+
+            // Обновляем текст лога по мере прогресса
+            if (progress > (step + 1) * 20 && step < steps.length) {
+                log.innerText = steps[step];
+                step++;
+            }
+
+            // Завершение загрузки
+            if (progress >= 100) {
+                clearInterval(bootInterval);
+                
+                // Гарантированно показываем последний статус
+                log.innerText = steps[steps.length - 1];
+                bar.style.width = "100%";
+
+                setTimeout(() => {
+                    // Плавное исчезновение загрузчика
+                    bootScreen.style.opacity = '0';
+                    setTimeout(() => {
+                        bootScreen.style.display = 'none';
+                        mainInterface.classList.add('active');
+                        // Запуск первой вкладки
+                        loadContent('personal');
+                    }, 500); // Время исчезновения экрана загрузки
+                }, 500);
+            }
+        }, 100);
+    }
+
+    // Эффект печати текста
+    function typeWriter(htmlContent, callback) {
+        contentDisplay.innerHTML = '';
+        
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = htmlContent;
+        
+        const container = document.createElement('div');
+        container.className = 'typewriter-text';
+        contentDisplay.appendChild(container);
+
+        const allTextNodes = getTextNodes(container);
+        let currentNodeIndex = 0;
+        let charIndex = 0;
+        
+        allTextNodes.forEach(node => node.nodeValue = '');
+
+        function type() {
+            if (currentNodeIndex < allTextNodes.length) {
+                const node = allTextNodes[currentNodeIndex];
+                const text = node.nodeValue;
+                
+                if (charIndex < text.length) {
+                    node.nodeValue = text.substring(0, charIndex + 1);
+                    charIndex++;
+                    setTimeout(type, Math.random() * 10 + 5);
+                    contentDisplay.scrollTop = contentDisplay.scrollHeight;
+                } else {
+                    currentNodeIndex++;
+                    charIndex = 0;
+                    setTimeout(type, 20);
+                }
+            } else {
+                const cursor = document.createElement('span');
+                cursor.className = 'cursor-block';
+                container.appendChild(cursor);
+                if (callback) callback();
+            }
+        }
+        
+        type();
+    }
+
+    // Вспомогательная функция для получения всех текстовых узлов
+    function getTextNodes(elem) {
+        let textNodes = [];
+        (function walk(elem) {
+            if (elem.nodeType === 3 && elem.nodeValue.trim().length > 0) {
+                textNodes.push(elem);
+            } else {
+                for (let i = 0; i < elem.childNodes.length; i++) {
+                    walk(elem.childNodes[i]);
+                }
+            }
+        })(elem);
+        return textNodes;
+    }
+
+    // Переключение вкладок
+    function loadContent(key) {
+        const item = globalData[key]; // Берем данные из переменной
+        if (!item) return;
+
+        buttons.forEach(btn => {
+            if (btn.dataset.target === key) btn.classList.add('active');
+            else btn.classList.remove('active');
+        });
+
+        let classBadge = item.classified ? '<span class="classification">СЕКРЕТНО</span>' : '';
+        const html = `
+            <div class="section-title">
+                ${item.title}
+                ${classBadge}
+            </div>
+            ${item.content}
+        `;
+
+        typeWriter(html);
+    }
+
+    buttons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            loadContent(btn.dataset.target);
+        });
+    });
+
+    // Запуск процесса при загрузке страницы
+    window.onload = function() {
+        loadData(); // Сначала грузим данные
+    };
+
+</script>
+</body>
+</html>
