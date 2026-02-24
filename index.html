@@ -432,7 +432,7 @@
     // Загрузка данных из файла data.json
     async function loadData() {
         try {
-            const response = await fetch('data.json');
+            const response = await fetch('/data.json');
             if (!response.ok) {
                 throw new Error("Ошибка загрузки файла");
             }
