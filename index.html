@@ -11,7 +11,7 @@
             --nt-dark: #005f6b;
             --nt-bg: #050a10;
             --nt-alert: #ff3333;
-            --nt-warn: #ffcc00;
+            --scanline-color: rgba(0, 255, 255, 0.05);
         }
 
         * {
@@ -31,8 +31,11 @@
             justify-content: center;
             overflow: hidden;
             position: relative;
+            padding-top: 20px; 
+            padding-bottom: 20px;
         }
 
+        /* CRT Эффект */
         .crt-overlay {
             position: fixed;
             top: 0;
@@ -55,18 +58,26 @@
             100% { opacity: 0.97; }
         }
 
+        /* Корпус Консоли */
         .console-frame {
             width: 1000px;
             max-width: 95%;
-            height: 650px;
+            height: 750px; 
             max-height: 95%;
             background-color: var(--nt-bg);
-            border: 1px solid var(--nt-blue);
+            border: 1px solid var(--nt-blue); 
             box-shadow: 0 0 30px rgba(0, 240, 255, 0.15), inset 0 0 20px rgba(0, 240, 255, 0.1);
             display: grid;
             grid-template-rows: 40px 1fr 50px;
             position: relative;
-            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%);
+            clip-path: polygon(
+                20px 0,     
+                100% 0,     
+                100% calc(100% - 20px), 
+                calc(100% - 20px) 100%, 
+                0 100%,     
+                0 20px      
+            );
             opacity: 0;
             transform: scale(0.95);
             transition: opacity 0.5s ease-out, transform 0.5s ease-out;
@@ -77,6 +88,7 @@
             transform: scale(1);
         }
 
+        /* Экран загрузки */
         #boot-screen {
             position: absolute;
             top: 0;
@@ -92,6 +104,7 @@
             font-size: 14px;
             transition: opacity 0.5s;
         }
+
         .loader-bar {
             width: 300px;
             height: 4px;
@@ -100,6 +113,7 @@
             position: relative;
             overflow: hidden;
         }
+
         .loader-progress {
             position: absolute;
             top: 0;
@@ -111,6 +125,7 @@
             transition: width 0.1s linear;
         }
 
+        /* Хедер */
         .header {
             border-bottom: 1px solid var(--nt-dark);
             display: flex;
@@ -119,25 +134,32 @@
             padding: 0 15px;
             font-size: 12px;
             background: rgba(0, 240, 255, 0.05);
+            flex-shrink: 0; 
         }
+
         .nt-logo {
             letter-spacing: 2px;
             text-shadow: 0 0 5px var(--nt-blue);
         }
 
+        /* Основная раскладка */
         .main-interface {
             display: grid;
             grid-template-columns: 250px 1fr;
             overflow: hidden;
+            height: 100%;
         }
 
+        /* Сайдбар */
         .sidebar {
             border-right: 1px solid var(--nt-dark);
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 20px;
+            padding: 20px 0; 
             background: rgba(0,0,0,0.3);
+            overflow: hidden;
+            height: 100%;
         }
 
         .avatar-box {
@@ -145,27 +167,29 @@
             height: 150px;
             border: 2px solid var(--nt-blue);
             margin-bottom: 20px;
+            flex-shrink: 0; 
             position: relative;
             overflow: hidden;
             background: #000;
+            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
         }
+
+        .avatar-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 5;
+        }
+
         .avatar-placeholder {
             width: 100%;
             height: 100%;
             background: radial-gradient(circle at 50% 30%, #553322, #1a1a1a);
             position: relative;
         }
-        .ear {
-            position: absolute;
-            top: -10px;
-            width: 0;
-            height: 0;
-            border-left: 20px solid transparent;
-            border-right: 20px solid transparent;
-            border-bottom: 40px solid #553322;
-        }
-        .ear.left { left: 10px; transform: rotate(-20deg); }
-        .ear.right { right: 10px; transform: rotate(20deg); }
 
         .scan-overlay {
             position: absolute;
@@ -176,6 +200,7 @@
             background-color: rgba(0, 240, 255, 0.5);
             animation: scan 2s linear infinite;
             box-shadow: 0 0 10px var(--nt-blue);
+            z-index: 10;
         }
         @keyframes scan {
             0% { top: 0; opacity: 0; }
@@ -184,19 +209,46 @@
             100% { top: 100%; opacity: 0; }
         }
 
-        /* Стилизация кнопок */
+        .profile-info {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 0 10px;
+            flex-shrink: 0;
+        }
+
         .nav-buttons {
             width: 100%;
             display: flex;
             flex-direction: column;
             gap: 10px;
+            padding: 0 15px 20px 15px; 
+            overflow-y: auto;
+            flex: 1; 
+            min-height: 0; 
+            
+            scrollbar-width: thin;
+            scrollbar-color: var(--nt-dark) transparent;
+        }
+
+        .nav-buttons::-webkit-scrollbar {
+            width: 6px;
+        }
+        .nav-buttons::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .nav-buttons::-webkit-scrollbar-thumb {
+            background-color: var(--nt-dark);
+            border-radius: 3px;
+        }
+        .nav-buttons::-webkit-scrollbar-thumb:hover {
+            background-color: var(--nt-blue);
         }
 
         .nav-btn {
             background: transparent;
             border: 1px solid var(--nt-dark);
             color: rgba(0, 240, 255, 0.6);
-            padding: 10px;
+            padding: 12px 10px; 
             text-align: left;
             font-family: inherit;
             cursor: pointer;
@@ -205,6 +257,10 @@
             overflow: hidden;
             text-transform: uppercase;
             font-size: 12px;
+            width: 100%;
+            box-sizing: border-box;
+            white-space: nowrap; 
+            flex-shrink: 0; 
         }
         .nav-btn::before {
             content: '>';
@@ -230,12 +286,16 @@
             font-weight: bold;
         }
 
+        /* Контент */
         .content-area {
             padding: 30px;
             overflow-y: auto;
             position: relative;
         }
-        .content-area::-webkit-scrollbar { width: 8px; }
+
+        .content-area::-webkit-scrollbar {
+            width: 8px;
+        }
         .content-area::-webkit-scrollbar-track { background: #020508; }
         .content-area::-webkit-scrollbar-thumb {
             background: var(--nt-dark);
@@ -268,16 +328,25 @@
             font-size: 14px;
             white-space: pre-wrap;
             color: rgba(0, 240, 255, 0.9);
+            padding: 0 !important;
+            margin: 0 !important;
+            display: inline-block;
         }
+        
         .cursor-block {
             display: inline-block;
             width: 8px;
-            height: 16px;
+            height: 18px;
             background-color: var(--nt-blue);
+            vertical-align: text-bottom;
+            margin-left: 2px;
             animation: blink 1s step-end infinite;
-            vertical-align: middle;
         }
-        @keyframes blink { 0%, 100% { background-color: var(--nt-blue); } 50% { background-color: transparent; } }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
 
         .data-grid {
             display: grid;
@@ -299,6 +368,27 @@
             color: #fff;
         }
 
+        .skill-container { margin-bottom: 15px; }
+        .skill-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 12px;
+        }
+        .progress-bar-bg {
+            width: 100%;
+            height: 8px;
+            background: #111;
+            border: 1px solid var(--nt-dark);
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--nt-dark), var(--nt-blue));
+            width: 0%;
+            transition: width 1s ease-out;
+            box-shadow: 0 0 5px var(--nt-blue);
+        }
+
         .footer {
             border-top: 1px solid var(--nt-dark);
             display: flex;
@@ -307,6 +397,7 @@
             font-size: 11px;
             color: rgba(0, 240, 255, 0.5);
             justify-content: space-between;
+            flex-shrink: 0;
         }
         .status-dot {
             width: 8px;
@@ -317,6 +408,8 @@
             margin-right: 5px;
             box-shadow: 0 0 5px #0f0;
         }
+        .hidden { display: none !important; }
+
     </style>
 </head>
 <body>
@@ -324,7 +417,7 @@
     <div class="crt-overlay"></div>
 
     <div id="boot-screen">
-        <div style="margin-bottom: 10px;">NANOTRASEEN OS v4.9.2</div>
+        <div style="margin-bottom: 10px;">NANOTRASEN OS v4.9.2</div>
         <div id="boot-log">INITIALIZING KERNEL...</div>
         <div class="loader-bar">
             <div class="loader-progress" id="boot-progress"></div>
@@ -334,7 +427,7 @@
     <div class="console-frame" id="main-interface">
         <header class="header">
             <div class="header-left">
-                <span class="nt-logo">NANOTRASEEN</span>
+                <span class="nt-logo">NANOTRASEN</span>
                 <span id="system-clock">00:00:00</span>
             </div>
             <div class="header-right">
@@ -345,20 +438,18 @@
         <div class="main-interface">
             <aside class="sidebar">
                 <div class="avatar-box">
-                    <div class="ear left"></div>
-                    <div class="ear right"></div>
+                    <img src="/k.png" class="avatar-img" alt="Avatar" onerror="this.style.display='none'">
                     <div class="avatar-placeholder"></div>
                     <div class="scan-overlay"></div>
                 </div>
                 
-                <div style="text-align: center; margin-bottom: 20px;">
+                <div class="profile-info">
                     <div style="font-size: 18px; color: #fff; text-shadow: 0 0 5px var(--nt-blue);">КАРИН ТАЙЛВИСК</div>
-                    <div style="font-size: 10px; color: var(--nt-blue);">ОФИЦЕР ЦК</div>
+                    <div style="font-size: 10px; color: var(--nt-blue);">ОФИЦЕР ЦЕНТРАЛЬНОГО КОМАНДОВАНИЯ</div>
                 </div>
 
-                <!-- КОНТЕЙНЕР ДЛЯ ДИНАМИЧЕСКИХ КНОПОК -->
-                <div id="nav-container" class="nav-buttons">
-                    <!-- Кнопки появятся здесь автоматически -->
+                <div class="nav-buttons">
+                    <!-- Кнопки сгенерируются из JS -->
                 </div>
             </aside>
 
@@ -372,162 +463,267 @@
     </div>
 
 <script>
-    // Глобальная переменная для хранения списка вкладок
-    let tabsData = [];
-    const contentDisplay = document.getElementById('content-display');
-    const navContainer = document.getElementById('nav-container');
-    let activeButton = null;
+const contentDisplay = document.getElementById('content-display');
+const navContainer = document.querySelector('.nav-buttons');
+let sectionsData = [];
 
-    function updateClock() {
-        const now = new Date();
-        document.getElementById('system-clock').innerText = now.toLocaleTimeString('ru-RU');
-    }
-    setInterval(updateClock, 1000);
-    updateClock();
+/* Часы */
+function updateClock() {
+    const now = new Date();
+    const clockEl = document.getElementById('system-clock');
+    if (clockEl) clockEl.innerText = now.toLocaleTimeString('ru-RU');
+}
+setInterval(updateClock, 1000);
+updateClock();
 
-    // Загрузка данных
-    async function loadData() {
-        try {
-            const response = await fetch('data.json');
-            if (!response.ok) throw new Error("Ошибка загрузки");
-            tabsData = await response.json();
-            startBootSequence();
-        } catch (error) {
-            console.error(error);
-            document.body.innerHTML = `<div style="color:red; text-align:center; padding:50px; font-family: monospace;">ОШИБКА: Не удалось загрузить data.json.<br>Запустите через локальный сервер (Live Server).</div>`;
+/* ========================= */
+/* BOOT SCREEN */
+/* ========================= */
+
+window.onload = function() {
+    const log = document.getElementById('boot-log');
+    const bar = document.getElementById('boot-progress');
+    const bootScreen = document.getElementById('boot-screen');
+    const mainInterface = document.getElementById('main-interface');
+    
+    const steps = [
+        "CHECKING MEMORY INTEGRITY...",
+        "LOADING NANOTRASEN PROTOCOLS...",
+        "CONNECTING TO SECURE DATABASE...",
+        "DECRYPTING PERSONNEL FILES...",
+        "ACCESS GRANTED."
+    ];
+
+    let step = 0;
+    let progress = 0;
+
+    const bootInterval = setInterval(() => {
+        progress += Math.random() * 5;
+        if(progress > 100) progress = 100;
+        bar.style.width = progress + "%";
+
+        if (progress > (step + 1) * 20 && step < steps.length) {
+            log.innerText = steps[step];
+            step++;
         }
-    }
 
-    // Создание кнопок на основе данных
-    function renderButtons() {
-        navContainer.innerHTML = ''; // Очистка
+        if (progress >= 100) {
+            clearInterval(bootInterval);
+            log.innerText = steps[steps.length - 1];
+            bar.style.width = "100%";
 
-        tabsData.forEach((item, index) => {
-            const btn = document.createElement('button');
-            btn.className = 'nav-btn';
-            btn.innerText = item.title;
-            
-            // Клик по кнопке
-            btn.addEventListener('click', () => {
-                loadContent(index);
-            });
-
-            // Первая кнопка активна
-            if (index === 0) {
-                btn.classList.add('active');
-                activeButton = btn;
-            }
-
-            navContainer.appendChild(btn);
-        });
-    }
-
-    function startBootSequence() {
-        // Сначала создаем кнопки (они появятся после загрузки)
-        renderButtons();
-
-        const log = document.getElementById('boot-log');
-        const bar = document.getElementById('boot-progress');
-        const bootScreen = document.getElementById('boot-screen');
-        const mainInterface = document.getElementById('main-interface');
-        
-        const steps = ["CHECKING MEMORY...", "LOADING OS...", "CONNECTING DB...", "DECRYPTING...", "ACCESS GRANTED."];
-        let step = 0;
-        let progress = 0;
-        
-        const bootInterval = setInterval(() => {
-            progress += Math.random() * 5;
-            if(progress > 100) progress = 100;
-            bar.style.width = progress + "%";
-
-            if (progress > (step + 1) * 20 && step < steps.length) {
-                log.innerText = steps[step];
-                step++;
-            }
-
-            if (progress >= 100) {
-                clearInterval(bootInterval);
-                log.innerText = steps[steps.length - 1];
-                setTimeout(() => {
-                    bootScreen.style.opacity = '0';
-                    setTimeout(() => {
-                        bootScreen.style.display = 'none';
-                        mainInterface.classList.add('active');
-                        // Загружаем первую вкладку (индекс 0)
-                        loadContent(0);
-                    }, 500);
+            setTimeout(async () => {
+                bootScreen.style.opacity = '0';
+                setTimeout(async () => {
+                    bootScreen.style.display = 'none';
+                    mainInterface.classList.add('active');
+                    await loadFileAndBuildUI();
                 }, 500);
-            }
-        }, 100);
-    }
-
-    function typeWriter(htmlContent, callback) {
-        contentDisplay.innerHTML = '';
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = htmlContent;
-        const container = document.createElement('div');
-        container.className = 'typewriter-text';
-        contentDisplay.appendChild(container);
-
-        const allTextNodes = getTextNodes(container);
-        let currentNodeIndex = 0;
-        let charIndex = 0;
-        allTextNodes.forEach(node => node.nodeValue = '');
-
-        function type() {
-            if (currentNodeIndex < allTextNodes.length) {
-                const node = allTextNodes[currentNodeIndex];
-                const text = node.nodeValue;
-                if (charIndex < text.length) {
-                    node.nodeValue = text.substring(0, charIndex + 1);
-                    charIndex++;
-                    setTimeout(type, Math.random() * 10 + 5);
-                    contentDisplay.scrollTop = contentDisplay.scrollHeight;
-                } else {
-                    currentNodeIndex++;
-                    charIndex = 0;
-                    setTimeout(type, 20);
-                }
-            } else {
-                const cursor = document.createElement('span');
-                cursor.className = 'cursor-block';
-                container.appendChild(cursor);
-                if (callback) callback();
-            }
+            }, 500);
         }
-        type();
+    }, 100);
+};
+
+/* ========================= */
+/* ЗАГРУЗКА data.txt */
+/* ========================= */
+
+async function loadFileAndBuildUI(){
+    try {
+        const response = await fetch('data.txt');
+        if(!response.ok) throw new Error("File not found");
+        const text = await response.text();
+        sectionsData = parseFile(text);
+        buildNavigation(sectionsData);
+
+        if (sectionsData.length > 0) {
+            loadContent(sectionsData[0].id);
+        }
+    } catch (e) {
+        console.error("Ошибка загрузки data.txt", e);
+        sectionsData = [
+            {
+                id: "demo",
+                title: "Системная Ошибка",
+                classified: true,
+                content: "<b>ФАЙЛ DATA.TXT НЕ ОБНАРУЖЕН.</b>\n\nУбедитесь, что файл находится в той же папке, что и HTML-документ.\n\n<i>Это демонстрация работы тегов:</i>\n1. <b>Жирный текст</b>\n2. <u>Подчеркнутый</u>\n3. <span style='color:#ff3333'>Красный текст</span>\n\nСистема работает в <i>автономном режиме</i>."
+            },
+            {
+                id: "demo2",
+                title: "Личная папка",
+                classified: false,
+                content: "Это пример второй вкладки, чтобы проверить, работает ли прокрутка кнопок, если их много."
+            },
+            {
+                id: "demo3",
+                title: "Секретные записи",
+                classified: true,
+                content: "Доступ ограничен."
+            },
+            {
+                id: "demo4",
+                title: "Архив логов",
+                classified: false,
+                content: "Логи за прошлый год..."
+            },
+             {
+                id: "demo5",
+                title: "Настройки",
+                classified: false,
+                content: "Настройки терминала..."
+            }
+        ];
+        buildNavigation(sectionsData);
+        loadContent("demo");
+    }
+}
+
+function parseFile(text){
+    const lines = text.split('\n');
+    const sections = [];
+    let current = null;
+
+    lines.forEach(line=>{
+        const cleanLine = line.trimEnd(); 
+        
+        if(cleanLine.startsWith('*')){
+            if(current) sections.push(current);
+
+            const title = cleanLine.replace('*','').trim();
+            current = {
+                id: title.toLowerCase().replace(/\s+/g,'-'),
+                title: title,
+                classified: false,
+                content: ''
+            };
+        } 
+        else if(cleanLine.startsWith('[SECRET]') && current){
+            current.classified = true;
+        }
+        else if(current){
+            current.content += cleanLine.trimStart() + '\n';
+        }
+    });
+
+    if(current) sections.push(current);
+    return sections;
+}
+
+/* ========================= */
+/* СОЗДАНИЕ КНОПОК */
+/* ========================= */
+
+function buildNavigation(sections){
+    navContainer.innerHTML = '';
+
+    sections.forEach(section=>{
+        const btn = document.createElement('button');
+        btn.className = 'nav-btn';
+        btn.textContent = section.title.toUpperCase();
+        btn.dataset.target = section.id;
+
+        btn.addEventListener('click',()=>{
+            loadContent(section.id);
+        });
+
+        navContainer.appendChild(btn);
+    });
+}
+
+/* ========================= */
+/* ЗАГРУЗКА КОНТЕНТА */
+/* ========================= */
+
+function loadContent(key){
+    const item = sectionsData.find(s=>s.id===key);
+    if (!item) return;
+
+    document.querySelectorAll('.nav-btn').forEach(btn=>{
+        btn.classList.toggle('active', btn.dataset.target===key);
+    });
+
+    const classBadge = item.classified 
+        ? '<span class="classification">СЕКРЕТНО</span>' 
+        : '';
+
+    contentDisplay.innerHTML = `
+        <div class="section-title">
+            ${item.title}
+            ${classBadge}
+        </div>
+        <div class="typewriter-text" id="tw"></div>
+    `;
+
+    const textElement = document.getElementById('tw');
+    typeWriter(textElement, item.content.trim());
+}
+
+
+/* ========================= */
+/* ПЛАВНЫЙ TYPEWRITER С ПОДДЕРЖКОЙ ТЕГОВ */
+/* ========================= */
+
+function typeWriter(element, text){
+    element.innerHTML = '';
+    
+    let htmlContent = text.replace(/\n/g, '<br>');
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = htmlContent;
+    
+    let nodes = [];
+    if (tempDiv.hasChildNodes()) {
+        tempDiv.childNodes.forEach(node => {
+            nodes.push(node);
+        });
+    } else {
+        nodes.push(document.createTextNode(htmlContent));
     }
 
-    function getTextNodes(elem) {
-        let textNodes = [];
-        (function walk(elem) {
-            if (elem.nodeType === 3 && elem.nodeValue.trim().length > 0) textNodes.push(elem);
-            else for (let i = 0; i < elem.childNodes.length; i++) walk(elem.childNodes[i]);
-        })(elem);
-        return textNodes;
+    let currentNodeIndex = 0;
+    let currentTextIndex = 0;
+    const speed = 5; 
+
+    function typing(){
+        if (currentNodeIndex >= nodes.length) {
+            const cursor = document.createElement('span');
+            cursor.className = 'cursor-block';
+            element.appendChild(cursor);
+            return;
+        }
+
+        const node = nodes[currentNodeIndex];
+
+        if (node.nodeType === 1) {
+            const clone = node.cloneNode(true);
+            element.appendChild(clone);
+            currentNodeIndex++;
+            currentTextIndex = 0;
+            setTimeout(typing, speed);
+        } 
+        else if (node.nodeType === 3) {
+            const textContent = node.textContent;
+            
+            if (currentTextIndex < textContent.length) {
+                const char = textContent[currentTextIndex];
+                const charSpan = document.createTextNode(char);
+                element.appendChild(charSpan);
+                
+                currentTextIndex++;
+                contentDisplay.scrollTop = contentDisplay.scrollHeight;
+                setTimeout(typing, speed);
+            } else {
+                currentNodeIndex++;
+                currentTextIndex = 0;
+                setTimeout(typing, speed);
+            }
+        } else {
+            currentNodeIndex++;
+            setTimeout(typing, speed);
+        }
     }
 
-    function loadContent(index) {
-        const item = tabsData[index];
-        if (!item) return;
-
-        // Обновляем активную кнопку
-        const buttons = navContainer.querySelectorAll('.nav-btn');
-        buttons.forEach(btn => btn.classList.remove('active'));
-        if(buttons[index]) buttons[index].classList.add('active');
-
-        let classBadge = item.classified ? '<span class="classification">СЕКРЕТНО</span>' : '';
-        const html = `
-            <div class="section-title">
-                ${item.title}
-                ${classBadge}
-            </div>
-            ${item.content}
-        `;
-        typeWriter(html);
-    }
-
-    window.onload = loadData;
+    typing();
+}
 </script>
 </body>
 </html>
