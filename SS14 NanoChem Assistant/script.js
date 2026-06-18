@@ -21,7 +21,7 @@ const materials = {
     "Келотан": { "Кремний": 0.5, "Углерод": 0.5 },
     "Криоксадон": { "Вода": 0.33333, "Дексалин": 0.33333, "Кислород": 0.33333 },
     "Лацеринол": { "Бензол": 0.5, "Бикаридин": 0.5 },
-    "Лепоразин": { "Силицид Железа": 0.33333, "Медь": 0.33333, "Плазма": "catalyst" },
+    "Лепоразин": { "Силицид Железа": 0.5, "Медь": 0.5, "Плазма": "catalyst" },
     "Маннитол": { "Водород": 0.33333, "Сахар": 0.33333, "Вода": 0.33333 },
     "Масло": { "Сварочное Топливо": 0.33333, "Водород": 0.33333, "Углерод": 0.33333 },
     "Некрозол": { "Криоксадон": 1, "Омнизин": 0.5, "Кровь": 1.5 },
@@ -117,10 +117,10 @@ function getProductionGraph(targetName, targetAmount) {
             existing.targetAmount += amount;
             return existing;
         }
-        
+
         const recipe = materials[name];
         const isBase = !recipe;
-        
+
         const node = {
             name: name,
             targetAmount: amount,
@@ -128,9 +128,9 @@ function getProductionGraph(targetName, targetAmount) {
             children: [],
             isBase: isBase
         };
-        
+
         visited.set(name, node);
-        
+
         if (!isBase) {
             for (let ingName in node.ingredients) {
                 if (node.ingredients[ingName] !== "catalyst") {
@@ -140,7 +140,7 @@ function getProductionGraph(targetName, targetAmount) {
                 }
             }
         }
-        
+
         return node;
     }
 
@@ -161,13 +161,15 @@ function getProductionGraph(targetName, targetAmount) {
 
 function calculateBottlenecks(steps, isRoundUp) {
     const stock = {};
-    
+
+    // --- ИСПРАВЛЕНИЕ ЦИКЛА: МАСЛО <-> СВАРОЧНОЕ ТОПЛИВО ---
     const hasOil = steps.some(s => s.name === "Масло");
     const hasFuel = steps.some(s => s.name === "Сварочное Топливо");
     if (hasOil && hasFuel) {
         if (!stock["Масло"]) stock["Масло"] = 5;
         if (!stock["Сварочное Топливо"]) stock["Сварочное Топливо"] = 5;
     }
+    // ---------------------------------------------------------------
 
     steps.forEach(step => {
         if (step.isBase) return;
@@ -181,13 +183,13 @@ function calculateBottlenecks(steps, isRoundUp) {
             }
         }
 
-        let limitingRatio = 1.0; 
+        let limitingRatio = 1.0;
 
         for (let ing in required) {
             if (step.ingredients[ing] === "catalyst") continue;
 
             const need = required[ing];
-            if (materials[ing]) { 
+            if (materials[ing]) {
                 const have = stock[ing] || 0;
                 if (have < need) {
                     const ratio = have / need;
@@ -213,11 +215,11 @@ function calculateBottlenecks(steps, isRoundUp) {
             const originalNeed = required[ing];
             const isCatalyst = (step.ingredients[ing] === "catalyst");
             let scaledNeed = isCatalyst ? 1 : originalNeed * limitingRatio;
-            
+
             const isIntermediate = materials[ing];
 
             if (isCatalyst) {
-                const isBase = !materials[ing]; 
+                const isBase = !materials[ing];
                 if (isBase) {
                      const use = 1;
                      actualIngredients[ing] = use;
@@ -237,14 +239,7 @@ function calculateBottlenecks(steps, isRoundUp) {
                     stock[ing] -= use;
                 }
             } else {
-                let buyAmount;
-                if (isRoundUp) {
-                    buyAmount = Math.ceil(scaledNeed + 0.001);
-                } else {
-                    // Строгий режим: округляем вверх до целого
-                    buyAmount = scaledNeed > 0 ? Math.ceil(scaledNeed) : 0;
-                }
-                
+                let buyAmount = isRoundUp ? Math.ceil(scaledNeed + 0.001) : Math.floor(scaledNeed);
                 if (buyAmount > 0) {
                     actualIngredients[ing] = buyAmount;
                     reactantVolume += buyAmount;
@@ -253,7 +248,7 @@ function calculateBottlenecks(steps, isRoundUp) {
         }
 
         const efficiency = recipeEfficiency[step.name] || 1;
-        let outputVolume = reactantVolume * efficiency; 
+        let outputVolume = reactantVolume * efficiency;
 
         if (isRoundUp && outputVolume < step.targetAmount) {
              outputVolume = Math.ceil(outputVolume);
@@ -272,33 +267,33 @@ function calculateBottlenecks(steps, isRoundUp) {
 
 function initSelect() {
     const allMeds = Object.keys(materials).sort();
-    
+
     selectEl.innerHTML = '';
 
     const pGroup = document.createElement('optgroup');
     pGroup.label = "Основная медицина";
-    priorityList.forEach(med => { 
-        if (materials[med]) { 
-            const opt = document.createElement('option'); 
-            opt.value = med; 
-            opt.textContent = med + (medLabels[med] || ''); 
-            pGroup.appendChild(opt); 
+    priorityList.forEach(med => {
+        if (materials[med]) {
+            const opt = document.createElement('option');
+            opt.value = med;
+            opt.textContent = med + (medLabels[med] || '');
+            pGroup.appendChild(opt);
         }
     });
     selectEl.appendChild(pGroup);
-    
+
     const aGroup = document.createElement('optgroup');
     aGroup.label = "Все вещества";
-    allMeds.forEach(med => { 
-        if (!priorityList.includes(med)) { 
-            const opt = document.createElement('option'); 
-            opt.value = med; 
-            opt.textContent = med; 
-            aGroup.appendChild(opt); 
+    allMeds.forEach(med => {
+        if (!priorityList.includes(med)) {
+            const opt = document.createElement('option');
+            opt.value = med;
+            opt.textContent = med;
+            aGroup.appendChild(opt);
         }
     });
     selectEl.appendChild(aGroup);
-    
+
     if (selectEl.options.length > 0) {
         selectEl.selectedIndex = 0;
     }
@@ -310,7 +305,7 @@ function updateCalculation() {
     const medName = selectEl.value;
     const requestAmount = parseInt(amountEl.value) || 200;
     const isRoundUp = roundUpEl.checked;
-    
+
     if (!materials[medName]) {
         resultsArea.innerHTML = `<div style="text-align:center; padding: 3rem; color: var(--text-muted);">Вещество не найдено в базе данных.</div>`;
         return;
@@ -318,11 +313,11 @@ function updateCalculation() {
 
     const steps = getProductionGraph(medName, requestAmount);
     calculateBottlenecks(steps, isRoundUp);
-    
+
     const shoppingList = {};
     steps.forEach(step => {
         if (step.isBase) return;
-        
+
         for (let ingName in step.finalIngredients) {
             const isBase = !materials[ingName];
             if (isBase) {
@@ -339,7 +334,7 @@ function updateCalculation() {
     const finalStep = steps[steps.length - 1];
     const requestMatches = (finalStep.finalVolume === requestAmount);
     let modeText = isRoundUp ? "С запасом" : "Строгое";
-    
+
     let warningHtml = '';
     if (!isRoundUp && !requestMatches && finalStep.finalVolume < requestAmount) {
         warningHtml = `<div class="volume-warning">Получено меньше запрошенного из-за ограничений рецепта (округление).</div>`;
@@ -354,7 +349,7 @@ function updateCalculation() {
         displaySteps.forEach((step, index) => {
             const isFinal = step.name === medName;
             let pillsHtml = '';
-            
+
             if (!step.finalIngredients) return;
 
             for (let ingName in step.finalIngredients) {
@@ -362,7 +357,7 @@ function updateCalculation() {
                 if (amount && amount > 0) {
                     const isCreated = materials[ingName];
                     const isCatalyst = (step.ingredients[ingName] === "catalyst");
-                    
+
                     let note = '';
                     let className = '';
 
@@ -377,7 +372,7 @@ function updateCalculation() {
                     pillsHtml += `<div class="ing-pill ${className}">${nameSpan} <span>${amount}u</span> ${note}</div>`;
                 }
             }
-            
+
             let tempHtml = '';
             if (reactionTemps[step.name]) {
                 tempHtml = `<span class="temp-badge">🔥 ${reactionTemps[step.name]}K</span>`;
@@ -385,7 +380,7 @@ function updateCalculation() {
 
             const titleClass = isFinal ? 'step-final' : '';
             const vol = step.finalVolume !== undefined ? step.finalVolume : 0;
-            
+
             let mixInfoHtml = '';
             if (step.catalystVolume > 0) {
                 mixInfoHtml = `<div class="step-mix-info">Всего в смеси: ${step.mixVolume}u (включая ${step.catalystVolume}u катализатора)</div>`;
