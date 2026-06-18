@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SS14 NanoChem Assistant</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <div id="site-title">
+            <div>SS14 NanoChem Assistant</div>
+            <ul class="header-nav">
+                <li><a href="#">Главная</a></li>
+                <li><a href="https://github.com/Fynex-x" target="_blank">GitHub</a></li>
+                <li><a href="https://fish.station.wiki.shizainc.com/guides/chemistry" target="_blank">Химия</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <main>
+        <section class="controls">
+            <label for="medicineSelect">Вещество</label>
+            <select id="medicineSelect"></select>
+
+            <label for="targetAmount">Желаемое количество</label>
+            <input type="number" id="targetAmount" value="200" min="1" max="1000">
+            
+            <hr style="border:0; border-top:1px solid var(--border); margin: 1.5rem 0;">
+            
+            <label>Настройки</label>
+            
+            <div class="checkbox-group">
+                <input type="checkbox" id="roundUpMode">
+                <label for="roundUpMode">Округление вверх (с запасом)</label>
+            </div>
+            <div style="font-size:0.75rem; color:var(--text-muted); margin-left: 1.5rem; margin-bottom: 0.5rem;">
+                Добавляет чуть больше реагентов, чтобы компенсировать потери при смешивании и получить нужный объем гарантированно.
+            </div>
+        </section>
+
+        <section class="results" id="resultsArea">
+            <div style="text-align:center; padding: 3rem; color: var(--text-muted);">
+                Загрузка данных...
+            </div>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

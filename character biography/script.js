@@ -2,7 +2,6 @@ const contentDisplay = document.getElementById('content-display');
 const navContainer = document.querySelector('.nav-buttons');
 let sectionsData = [];
 
-/* Часы */
 function updateClock() {
     const now = new Date();
     const clockEl = document.getElementById('system-clock');
@@ -11,7 +10,6 @@ function updateClock() {
 setInterval(updateClock, 1000);
 updateClock();
 
-/* Boot screen */
 window.onload = function() {
     const log = document.getElementById('boot-log');
     const bar = document.getElementById('boot-progress');
@@ -56,7 +54,6 @@ window.onload = function() {
     }, 100);
 };
 
-/* Загрузка data.txt */
 async function loadFileAndBuildUI(){
     try {
         const response = await fetch('data.txt');
@@ -98,7 +95,6 @@ function parseFile(text){
     return sections;
 }
 
-/* Создание кнопок */
 function buildNavigation(sections){
     navContainer.innerHTML = '';
     sections.forEach(section=>{
@@ -111,7 +107,6 @@ function buildNavigation(sections){
     });
 }
 
-/* Загрузка контента */
 function loadContent(key){
     const item = sectionsData.find(s=>s.id===key);
     if(!item) return;
@@ -128,7 +123,6 @@ function loadContent(key){
     typeWriter(textElement, item.content.trim());
 }
 
-/* Typewriter */
 function typeWriter(element, text){
     element.innerHTML = '';
     let htmlContent = text.replace(/\n/g,'<br>');
