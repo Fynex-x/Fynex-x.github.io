@@ -66,16 +66,15 @@ const reactionTemps = {
     "Столовая Соль": 370, "Бензол": 310, "Силицид Железа": 310, "Гидроксид": 310
 };
 
-// Полный список описаний для всех химикатов
 const medLabels = {
     "Базовая медицина": "",
-    "Дексалин": "(Кислород)",
+    "Дексалин": "(Нехватки воздуха)",
     "Дермалин": "(Ожоги)",
-    "Бикаридин": "(Ушибы)",
+    "Бикаридин": "(Механических)",
     "Трикордразин": "(Универсальное)",
-    "Инапровалин": "(Крит. состояние)",
+    "Инапровалин": "(Удушья/Работает только в крит. состояние)",
     "Инсузин": "(Клетки/Кровь)",
-    "Пунктураз": "(Уколы/Шпоры)",
+    "Пунктураз": "(Уколы)",
     "Окулин": "(Зрение)",
     "Физраствор": "(Кровь)",
     "Маннитол": "(Мозговые травмы)",
@@ -85,10 +84,10 @@ const medLabels = {
     "Амбузол": "(Оживление)",
     "Амбузол Плюс": "(Полное оживление)",
     "Аритразин": "(Радиация)",
-    "Бруизин": "(Сильные ушибы)",
+    "Бруизин": "(Ушибы)",
     "Бритвиум": "(Порезы)",
     "Гиперзин": "(Удушье/Стим)",
-    "Дексалин Плюс": "(Сильное удушье)",
+    "Дексалин Плюс": "(Удушья/Кровопотери)",
     "Диловен": "(Основа лекарств)",
     "Криоксадон": "(Обморожение)",
     "Лацеринол": "(Порезы)",
@@ -100,7 +99,7 @@ const medLabels = {
     "Фалангимин": "(Клетки)",
     "Эпинефрин": "(Шок/Дыхание)",
     "Галоперидол": "(Усыпление)",
-    "Дифенгидрамин": "(Аллергия/Сон)",
+    "Дифенгидрамин": "(Сон)",
     "Эфедрин": "(Стимулятор)",
     "Хлоральгидрат": "(Снотворное)",
     "Космический мираж": "(Галлюцинации)",
@@ -127,7 +126,6 @@ const medLabels = {
     "Масло": "(Реагент)"
 };
 
-// Категории для группировки в выпадающем списке
 const chemCategories = {
     "Базовая медицина": [
         "Бикаридин", "Дермалин", "Дексалин", "Трикордразин", "Инапровалин",
@@ -143,231 +141,163 @@ const chemCategories = {
         "Галоперидол", "Дифенгидрамин", "Эфедрин", "Хлоральгидрат",
         "Космический мираж", "Ковриний"
     ],
-    "Пиротехника": [
-        "Напалм", "Термит"
-    ],
-    "Токсины": [
-        "Варфарин", "Фенол"
-    ],
+    "Пиротехника": ["Напалм", "Термит"],
+    "Токсины": ["Варфарин", "Фенол"],
     "Пищевые": [], 
     "Ботанические": [], 
-    "Биологические": [
-        "Нестабильный Мутаген", "Хироналин"
-    ],
-    "Специальные": [
-        "Пенообразователь", "Отбеливатель", "Космический Очиститель"
-    ],
+    "Биологические": ["Нестабильный Мутаген", "Хироналин"],
+    "Специальные": ["Пенообразователь", "Отбеливатель", "Космический Очиститель"],
     "Прочее": [] 
 };
 
 const categoryOrder = [
-    "Базовая медицина",
-    "Продвинутая медицина",
-    "Наркотики",
-    "Пиротехника",
-    "Токсины",
-    "Пищевые",
-    "Ботанические",
-    "Биологические",
-    "Специальные",
-    "Прочее"
+    "Базовая медицина", "Продвинутая медицина", "Наркотики", "Пиротехника",
+    "Токсины", "Пищевые", "Ботанические", "Биологические", "Специальные", "Прочее"
 ];
-
-const recipeEfficiency = {};
-for (let chem in materials) {
-    const comps = materials[chem];
-    let sumRatios = 0;
-    for (let k in comps) {
-        if (typeof comps[k] !== 'string') {
-            sumRatios += comps[k];
-        }
-    }
-    recipeEfficiency[chem] = sumRatios > 0 ? 1 / sumRatios : 1;
-}
 
 let selectEl, amountEl, roundUpEl, resultsArea;
 
-function getProductionGraph(targetName, targetAmount) {
-    const steps = [];
-    const visited = new Map();
+function calculateRecipe(targetName, targetAmount, isRoundUp) {
+    const baseMultipliers = {};
 
-    function buildNode(name, amount) {
-        if (visited.has(name)) {
-            const existing = visited.get(name);
-            existing.targetAmount += amount;
-            return existing;
-        }
+    function snapToGrid(val, decimals = 2) {
+        const factor = Math.pow(10, decimals);
+        return Math.round(val * factor) / factor;
+    }
 
+    function getMultipliers(name, amount) {
         const recipe = materials[name];
-        const isBase = !recipe;
-
-        const node = {
-            name: name,
-            targetAmount: amount,
-            ingredients: recipe || {},
-            children: [],
-            isBase: isBase
-        };
-
-        visited.set(name, node);
-
-        if (!isBase) {
-            for (let ingName in node.ingredients) {
-                if (node.ingredients[ingName] !== "catalyst") {
-                    const neededVol = amount * node.ingredients[ingName];
-                    const childNode = buildNode(ingName, neededVol);
-                    node.children.push(childNode);
-                }
-            }
-        }
-
-        return node;
-    }
-
-    const rootNode = buildNode(targetName, targetAmount);
-
-    function flatten(node, visitedSet = new Set()) {
-        if (visitedSet.has(node.name)) return [];
-        visitedSet.add(node.name);
-
-        const list = [];
-        node.children.forEach(child => list.push(...flatten(child, visitedSet)));
-        list.push(node);
-        return list;
-    }
-
-    return flatten(rootNode);
-}
-
-function calculateBottlenecks(steps, isRoundUp) {
-    const stock = {};
-
-    // --- ИСПРАВЛЕНИЕ ЦИКЛА: МАСЛО <-> СВАРОЧНОЕ ТОПЛИВО ---
-    const hasOil = steps.some(s => s.name === "Масло");
-    const hasFuel = steps.some(s => s.name === "Сварочное Топливо");
-    if (hasOil && hasFuel) {
-        if (!stock["Масло"]) stock["Масло"] = 5;
-        if (!stock["Сварочное Топливо"]) stock["Сварочное Топливо"] = 5;
-    }
-    // ---------------------------------------------------------------
-
-    steps.forEach(step => {
-        if (step.isBase) return;
-
-        let required = {};
-        for (let ing in step.ingredients) {
-            if (step.ingredients[ing] === "catalyst") {
-                required[ing] = 1;
-            } else {
-                required[ing] = step.targetAmount * step.ingredients[ing];
-            }
-        }
-
-        let limitingRatio = 1.0;
-
-        for (let ing in required) {
-            if (step.ingredients[ing] === "catalyst") continue;
-
-            const need = required[ing];
-            if (materials[ing]) {
-                const have = stock[ing] || 0;
-                if (have < need) {
-                    const ratio = have / need;
-                    if (ratio < limitingRatio) {
-                        limitingRatio = ratio;
-                    }
-                }
-            }
-        }
-
-        if (limitingRatio <= 0) {
-            step.finalVolume = 0;
-            step.finalIngredients = {};
-            step.mixVolume = 0;
+        if (!recipe) {
+            baseMultipliers[name] = (baseMultipliers[name] || 0) + amount;
             return;
         }
 
-        let actualIngredients = {};
-        let reactantVolume = 0;
-        let catalystVolume = 0;
+        for (let ingName in recipe) {
+            if (recipe[ingName] === "catalyst") continue;
+            const needed = amount * recipe[ingName];
+            getMultipliers(ingName, needed);
+        }
+    }
 
-        for (let ing in required) {
-            const originalNeed = required[ing];
-            const isCatalyst = (step.ingredients[ing] === "catalyst");
-            let scaledNeed = isCatalyst ? 1 : originalNeed * limitingRatio;
+    getMultipliers(targetName, targetAmount);
 
-            const isIntermediate = materials[ing];
+    const actualBases = {};
+    for (let base in baseMultipliers) {
+        const exactNeed = snapToGrid(baseMultipliers[base], 2); 
+        actualBases[base] = isRoundUp ? Math.ceil(exactNeed) : Math.floor(exactNeed);
+    }
 
-            if (isCatalyst) {
-                const isBase = !materials[ing];
-                if (isBase) {
-                     const use = 1;
-                     actualIngredients[ing] = use;
-                     catalystVolume += use;
-                } else {
-                    const have = stock[ing] || 0;
-                    if (have >= 1) {
-                        actualIngredients[ing] = 1;
-                        catalystVolume += 1;
-                    }
-                }
-            } else if (isIntermediate) {
-                const use = Math.floor(scaledNeed);
-                if (use > 0) {
-                    actualIngredients[ing] = use;
-                    reactantVolume += use;
-                    stock[ing] -= use;
-                }
-            } else {
-                let buyAmount = isRoundUp ? Math.ceil(scaledNeed + 0.001) : Math.floor(scaledNeed);
-                if (buyAmount > 0) {
-                    actualIngredients[ing] = buyAmount;
-                    reactantVolume += buyAmount;
-                }
+    const topoOrder = [];
+    const visited = new Set();
+
+    function buildTopo(name) {
+        if (visited.has(name)) return;
+        visited.add(name);
+        const recipe = materials[name];
+        if (!recipe) return; 
+
+        for (let ingName in recipe) {
+            if (recipe[ingName] !== "catalyst") buildTopo(ingName);
+        }
+        topoOrder.push(name);
+    }
+
+    buildTopo(targetName);
+
+    const yields = { ...actualBases };
+    const stepsData = {};
+
+    for (let name of topoOrder) {
+        const recipe = materials[name];
+        
+        let totalRatio = 0;
+        for (let k in recipe) {
+            if (recipe[k] !== "catalyst") totalRatio += recipe[k];
+        }
+
+        let limitingVolume = Infinity;
+        const stepIngredients = {};
+
+        for (let ingName in recipe) {
+            if (recipe[ingName] === "catalyst") {
+                stepIngredients[ingName] = { amount: 1, isCatalyst: true };
+                continue;
+            }
+
+            const have = yields[ingName] || 0;
+            const needRatio = recipe[ingName];
+            const maxPossible = have / needRatio;
+
+            if (maxPossible < limitingVolume) {
+                limitingVolume = maxPossible;
             }
         }
 
-        const efficiency = recipeEfficiency[step.name] || 1;
-        let outputVolume = reactantVolume * efficiency;
+        if (limitingVolume === Infinity) limitingVolume = 0;
 
-        if (isRoundUp && outputVolume < step.targetAmount) {
-             outputVolume = Math.ceil(outputVolume);
-        } else {
-            outputVolume = Math.floor(outputVolume);
+        const rawYield = limitingVolume * totalRatio;
+        const actualYield = Math.floor(snapToGrid(rawYield, 2) + 0.001);
+        yields[name] = actualYield;
+
+        for (let ingName in recipe) {
+            if (recipe[ingName] === "catalyst") continue;
+            const useAmount = Math.floor(snapToGrid(limitingVolume * recipe[ingName], 2) + 0.001);
+            stepIngredients[ingName] = { amount: useAmount, isCatalyst: false };
+            
+            if (!materials[ingName]) {
+                actualBases[ingName] = (actualBases[ingName] || 0);
+            }
         }
 
-        stock[step.name] = outputVolume;
+        const catalystVol = Object.values(stepIngredients).filter(i => i.isCatalyst).reduce((s, i) => s + i.amount, 0);
 
-        step.finalIngredients = actualIngredients;
-        step.finalVolume = outputVolume;
-        step.mixVolume = outputVolume + catalystVolume;
-        step.catalystVolume = catalystVolume;
+        stepsData[name] = {
+            yield: actualYield,
+            ingredients: stepIngredients,
+            mixVolume: actualYield + catalystVol,
+            catalystVolume: catalystVol
+        };
+    }
+
+    const displaySteps = topoOrder.map(name => {
+        const data = stepsData[name];
+        const finalIngredients = {};
+        for (let ing in data.ingredients) {
+            finalIngredients[ing] = data.ingredients[ing].amount;
+        }
+        return {
+            name: name,
+            ingredients: materials[name],
+            finalIngredients: finalIngredients,
+            finalVolume: data.yield,
+            mixVolume: data.mixVolume,
+            catalystVolume: data.catalystVolume
+        };
     });
+
+    const finalStep = displaySteps[displaySteps.length - 1];
+    
+    return { displaySteps, shoppingList: actualBases, finalStep };
 }
 
 function initSelect() {
     selectEl.innerHTML = '';
-    
     const addedChemicals = new Set();
 
     categoryOrder.forEach(catName => {
         let chems = chemCategories[catName];
-        
         if (catName === "Прочее") {
             chems = Object.keys(materials).filter(k => !addedChemicals.has(k));
         }
-
         chems.sort();
 
         if (chems.length > 0) {
             const group = document.createElement('optgroup');
             group.label = catName;
-            
             chems.forEach(med => {
                 if (materials[med]) {
                     const opt = document.createElement('option');
                     opt.value = med;
-                    // Без метки в списке
                     opt.textContent = med; 
                     group.appendChild(opt);
                     addedChemicals.add(med);
@@ -377,9 +307,7 @@ function initSelect() {
         }
     });
 
-    if (selectEl.options.length > 0) {
-        selectEl.selectedIndex = 0;
-    }
+    if (selectEl.options.length > 0) selectEl.selectedIndex = 0;
 }
 
 function updateCalculation() {
@@ -394,46 +322,28 @@ function updateCalculation() {
         return;
     }
 
-    const steps = getProductionGraph(medName, requestAmount);
-    calculateBottlenecks(steps, isRoundUp);
-
-    const shoppingList = {};
-    steps.forEach(step => {
-        if (step.isBase) return;
-
-        for (let ingName in step.finalIngredients) {
-            const isBase = !materials[ingName];
-            if (isBase) {
-                if (!shoppingList[ingName]) shoppingList[ingName] = 0;
-                shoppingList[ingName] += step.finalIngredients[ingName];
-            }
-        }
-    });
+    const { displaySteps, shoppingList, finalStep } = calculateRecipe(medName, requestAmount, isRoundUp);
 
     const shopHtml = Object.keys(shoppingList).sort()
         .map(ing => `<tr><td>${ing}</td><td style="color:var(--accent); font-weight:bold;">${shoppingList[ing]} u</td></tr>`)
         .join('');
 
-    const finalStep = steps[steps.length - 1];
     const requestMatches = (finalStep.finalVolume === requestAmount);
     let modeText = isRoundUp ? "С запасом" : "Строгое";
 
     let warningHtml = '';
-    if (!isRoundUp && !requestMatches && finalStep.finalVolume < requestAmount) {
-        warningHtml = `<div class="volume-warning">Получено меньше запрошенного из-за ограничений рецепта (округление).</div>`;
+    if (!requestMatches && finalStep.finalVolume < requestAmount) {
+        warningHtml = `<div class="volume-warning">Получено меньше из-за пропорций и округления базовых элементов.</div>`;
     }
 
     let stepsHtml = '';
-    const displaySteps = steps.filter(s => !s.isBase);
 
     if (displaySteps.length === 0) {
-        stepsHtml = '<div style="color: var(--text-muted);">Это базовый реагент, смешивание не требуется.</div>';
+        stepsHtml = '<div style="color: var(--text-muted);">Это базовый реагент.</div>';
     } else {
-        displaySteps.forEach((step, index) => {
+        displaySteps.forEach((step) => {
             const isFinal = step.name === medName;
             let pillsHtml = '';
-
-            if (!step.finalIngredients) return;
 
             for (let ingName in step.finalIngredients) {
                 const amount = step.finalIngredients[ingName];
@@ -451,8 +361,7 @@ function updateCalculation() {
                         note = '(Создано)';
                     }
 
-                    const nameSpan = `<span class="ing-name">${ingName}</span>`;
-                    pillsHtml += `<div class="ing-pill ${className}">${nameSpan} <span>${amount}u</span> ${note}</div>`;
+                    pillsHtml += `<div class="ing-pill ${className}"><span class="ing-name">${ingName}</span> <span>${amount}u</span> ${note}</div>`;
                 }
             }
 
@@ -462,7 +371,6 @@ function updateCalculation() {
             }
 
             const titleClass = isFinal ? 'step-final' : '';
-            const vol = step.finalVolume !== undefined ? step.finalVolume : 0;
 
             let mixInfoHtml = '';
             if (step.catalystVolume > 0) {
@@ -473,7 +381,7 @@ function updateCalculation() {
                 <div class="step-item">
                     <div class="step-marker"></div>
                     <div class="step-header">
-                        <span class="${titleClass}">${step.name} (${vol}u)</span>
+                        <span class="${titleClass}">${step.name} (${step.finalVolume}u)</span>
                         ${tempHtml}
                     </div>
                     ${mixInfoHtml}
@@ -483,7 +391,6 @@ function updateCalculation() {
         });
     }
 
-    // Отображение описания под заголовком
     const descriptionHtml = medLabels[medName] 
         ? `<div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; font-weight: normal;">${medLabels[medName]}</div>` 
         : '';
@@ -504,9 +411,7 @@ function updateCalculation() {
             </div>
             <div class="card-body">
                 <h3 style="margin-top:0">🛒 Базовые элементы</h3>
-                <p class="info-text">
-                    Базовые реагенты, которые нужно взять из диспенсеров.
-                </p>
+                <p class="info-text">Базовые реагенты, которые нужно взять из диспенсеров.</p>
                 <table>
                     <thead><tr><th>Вещество</th><th>Кол-во</th></tr></thead>
                     <tbody>${shopHtml}</tbody>
