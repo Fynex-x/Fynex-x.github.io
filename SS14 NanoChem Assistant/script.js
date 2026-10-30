@@ -1,668 +1,599 @@
-const materials = {
-    "Акриоксарин": { "Литий": 0.33333, "Трикордразин": 0.33333, "Криоксадон": 0.33333 },
-    "Алоксадон": { "Лепоразин": 0.5, "Криоксадон": 0.5, "Алоэ": 0.25 },
-    "Амбузол": { "Диловен": 0.25, "Аммиак": 0.25, "Кровь Зомби": 0.5 },
-    "Амбузол Плюс": { "Амбузол": 0.5, "Омнизин": 0.5 },
-    "Аритразин": { "Водород": 0.5, "Хироналин": 0.5 },
-    "Бикаридин": { "Инапровалин": 0.5, "Углерод": 0.5 },
-    "Бруизин": { "Бикаридин": 0.5, "Литий": 0.45, "Сахар": 0.5 },
-    "Бритвиум": { "Лацеринол": 1, "Бикаридин": 1 },
-    "Галоперидол": { "Масло": 0.2, "Иодид Калия": 0.2, "Алюминий": 0.2, "Фтор": 0.2, "Хлор": 0.2 },
-    "Гидроксид Натрия": { "Гидроксид": 0.5, "Натрий": 0.5 },
-    "Гиперзин": { "Вестин": 0.5, "Эфедрин": 0.5, "Кислород": 1 },
-    "Дексалин": { "Кислород": 1, "Плазма": "catalyst" },
-    "Дексалин Плюс": { "Дексалин": 0.33333, "Железо": 0.33333, "Углерод": 0.33333 },
-    "Дермалин": { "Келотан": 0.33333, "Кислород": 0.33333, "Фосфор": 0.33333 },
-    "Дифенгидрамин": { "Диэтиламин": 0.2, "Масло": 0.2, "Столовая Соль": 0.2, "Углерод": 0.2, "Этанол": 0.2 },
-    "Диловен": { "Азот": 0.33333, "Калий": 0.33333, "Кремний": 0.33333 },
-    "Инапровалин": { "Кислород": 0.33333, "Сахар": 0.33333, "Углерод": 0.33333 },
-    "Инсузин": { "Келотан": 0.33333, "Кремний": 0.33333, "Лепоразин": 0.33333 },
-    "Иодид Калия": { "Йод": 0.5, "Калий": 0.5 },
-    "Келотан": { "Кремний": 0.5, "Углерод": 0.5 },
-    "Криоксадон": { "Вода": 0.33333, "Дексалин": 0.33333, "Кислород": 0.33333 },
-    "Лацеринол": { "Бензол": 0.5, "Бикаридин": 0.5 },
-    "Лепоразин": { "Силицид Железа": 0.5, "Медь": 0.5, "Плазма": "catalyst" },
-    "Маннитол": { "Водород": 0.33333, "Сахар": 0.33333, "Вода": 0.33333 },
-    "Масло": { "Сварочное Топливо": 0.33333, "Водород": 0.33333, "Углерод": 0.33333 },
-    "Некрозол": { "Криоксадон": 1, "Омнизин": 0.5, "Кровь": 1.5 },
-    "Нестабильный Мутаген": { "Радий": 0.33333, "Фосфор": 0.33333, "Хлор": 0.33333 },
-    "Пунктураз": { "Бикаридин": 0.5, "Гидроксид": 0.5 },
-    "Пиразин": { "Лепоразин": 0.33333, "Дермалин": 0.33333, "Углерод": 0.33333 },
-    "Стимуляторы": { "Вестин": 0.5, "Эфедрин": 0.5, "Кислород": 1 },
-    "Транексамовая Кислота": { "Инапровалин": 0.33333, "Сахар": 0.33333, "Серная Кислота": 0.33333 },
-    "Трикордразин": { "Диловен": 0.5, "Инапровалин": 0.5 },
-    "Фалангимин": { "Нестабильный Мутаген": 0.33333, "Хироналин": 0.33333, "Этанол": 0.33333 },
-    "Физраствор": { "Вода": 0.8, "Столовая Соль": 0.2 },
-    "Фенол": { "Бензол": 0.5, "Гидроксид": 0.5 },
-    "Хироналин": { "Диловен": 0.5, "Радий": 0.5 },
-    "Хлоральгидрат": { "Хлор": 3, "Этанол": 1, "Вода": 1 },
-    "Эпинефрин": { "Гидроксид": 0.25, "Ацетон": 0.25, "Фенол": 0.25, "Хлор": 0.25 },
-    "Эфедрин": { "Масло": 0.25, "Сахар": 0.25, "Диэтиламин": 0.25, "Водород": 0.25 },
-    "Аммиак": { "Водород": 0.75, "Азот": 0.25 },
-    "Ацетон": { "Масло": 0.5, "Сварочное Топливо": 0.5, "Кислород": 0.5 },
-    "Бензол": { "Водород": 1, "Углерод": 1 },
-    "Варфарин": { "Серная Кислота": 0.5, "Азот": 0.5, "Натрий": 0.5 },
-    "Гидроксид": { "Кислород": 0.5, "Водород": 0.5 },
-    "Диэтиламин": { "Аммиак": 0.5, "Этанол": 0.5 },
-    "Столовая Соль": { "Натрий": 0.5, "Хлор": 0.5 },
-    "Силицид Железа": { "Железо": 0.5, "Кремний": 0.5 },
-    "Серная Кислота": { "Водород": 0.33333, "Сера": 0.33333, "Кислород": 0.66667 },
-    "Уголь": { "Углерод": 1, "Зола": 1 },
-    "Отбеливатель": { "Гидроксид Натрия": 0.2, "Космический Очиститель": 0.4, "Столовая Соль": 0.4 },
-    "Космический Очиститель": { "Вода": 0.5, "Аммиак": 0.5 },
-    "Напалм": { "Масло": 0.33333, "Этанол": 0.33333, "Сварочное Топливо": 0.33333 },
-    "Пенообразователь": { "Литий": 0.5, "Водород": 0.5 },
-    "Термит": { "Железо": 0.33333, "Алюминий": 0.33333, "Кислород": 0.33333 },
-    "Окулин": { "Гидроксид": 0.5, "Столовая Соль": 0.25, "Кровь": 0.25 },
-    "Космический мираж": { "Сахар": 0.33333, "Литий": 0.33333, "Ртуть": 0.33333 },
-    "Ковриний": { "Космический мираж": 0.33333, "Волокно": 0.66666 },
-    // Новые химикаты из оригинального калькулятора
-    "Ипекак": { "Калий": 0.5, "Азот": 0.5, "Аммиак": 0.5 },
-    "Сигинат": { "Вода": 0.25, "Сахар": 0.25, "Карбонат натрия": 0.25, "Келотан": 0.25, "Гидроксид натрия": 0.25 },
-    "Сидерлак": { "Стеллибинин": 0.5, "Алоэ": 0.5 },
-    "Когнизин": { "Карпотоксин": 0.33333, "Ацетон": 0.33333, "Сидерлак": 0.33333 },
-    "Ультраваскулин": { "Гистамин": 0.66667, "Плазма": "catalyst" },
-    "Липозин": { "Радий": 0.33333, "Этанол": 0.33333, "Столовая Соль": 0.33333 },
-    "Криптобиолин": { "Кислород": 0.33333, "Калий": 0.33333, "Сахар": 0.33333 },
-    "Синаптизин": { "Литий": 0.33333, "Сахар": 0.33333, "Вода": 0.33333 },
-    "Святая вода": { "Вода": 1 },
-    "Карбонат натрия": { "Кислород": 0.25, "Аммиак": 0.25, "Углерод": 0.25, "Столовая Соль": 0.25 },
-    "Артефактный клей": { "Артифексиум": 0.5, "Космический клей": 0.5 },
-    "Лёд": { "Вода": 0.5, "Фризиум": 0.5 },
-    "Космический клей": { "Слизь": 0.5, "Космическая смазка": 0.5 },
-    "Космическая смазка": { "Вода": 0.33333, "Кислород": 0.33333, "Силицид железа": 0.33333 },
-    "Полиакрилат натрия": { "Кислород": 0.5, "Натрий": 0.25, "Азот": 0.25 },
-    "Щёлок": { "Вода": 0.5, "Пепел": 0.5 },
-    "Фторсерная кислота": { "Водород": 0.25, "Калий": 0.25, "Фтор": 0.25, "Серная Кислота": 0.25 },
-    "Фризиум": { "Вода": 0.3, "Криоксадон": 0.044, "Азот": 0.4, "Столовая соль": 0.016, "Фрезон": 0.6, "Плазма": "catalyst" },
-    "Фторсурфактант": { "Серная Кислота": 0.2, "Фтор": 0.4, "Углерод": 0.4 },
-    "Фелиназ": { "Галоперидол": 0.6, "Карпотоксин": 0.4, "Универсальный фермент": 0.2, "Псикодин": 0.4 },
-    "Каниназ": { "Галоперидол": 0.6, "Универсальный фермент": 0.2, "Счастье": 0.4, "Псикодин": 0.4 },
-    "Жужжехлориновые пчёлы": { "Молотые пчёлы": 0.2, "Хлор": 0.2, "Нестабильный Мутаген": 0.2, "Волокно": 0.2, "Саксонит": 0.2 },
-    "Тазинид": { "Вестин": 0.5, "Ликоксид": 0.5 },
-    "Геморринол": { "Плазма": 0.33333, "Варфарин": 0.66667, "Бритвиум": 0.66667 },
-    "Липолицид": { "Ртуть": 0.33333, "Эфедрин": 0.33333, "Диэтиламин": 0.33333 },
-    "Лексорин": { "Плазма": 0.33333, "Токсин майндбрейкер": 0.33333, "Вестин": 0.33333 },
-    "Ликоксид": { "Литий": 0.5, "Цинк": 0.5 },
-    "Политриновая кислота": { "Серная Кислота": 0.33333, "Калий": 0.33333, "Плазма": 0.33333 },
-    "Токсин": { "Кровь зомби": 1 },
-    "Токсин майндбрейкер": { "Водород": 0.33333, "Кремний": 0.33333, "Диловен": 0.33333 },
-    "Токсин немоты": { "Вестин": 0.66667, "Уран": 0.33333, "Космический клей": 0.66667 },
-    "Пакс": { "Вода": 0.33333, "Синаптизин": 0.33333, "Токсин майндбрейкер": 0.33333 },
-    "Дезоксиэфедрин": { "Фосфор": 0.25, "Йод": 0.25, "Эфедрин": 0.25, "Углерод": 0.25 },
-    "Норэпинефриновая кислота": { "Уран": 0.5, "Эпинефрин": 0.5 },
-    "Ноктюрин": { "Вестин": 0.33333, "Импедризин": 0.66667 },
-    "Счастье": { "Смех": 0.4, "Этанол": 0.2, "Эпинефрин": 0.2, "Плазма": "catalyst" },
-    "Коргиум": { "Счастье": 0.33333, "Сок, заставляющий говорить Вех": 0.33333, "Непрожаренные животные протеины": 0.33333 },
-    "Импедризин": { "Кислород": 0.33333, "Ртуть": 0.33333, "Вода": 0.33333 },
-    "Псикодин": { "Вода": 0.4, "Маннитол": 0.4, "Импедризин": 0.2 },
-    "Кетчуп": { "Сахар": 0.33333, "Томатный сок": 0.66667 },
-    "Холодящий соус": { "Морозное масло": 0.33333, "Столовая Соль": 0.33333, "Томатный сок": 0.33333 },
-    "Столовая соль": { "Натрий": 0.5, "Хлор": 0.5 },
-    "Кетчунез": { "Майонез": 0.5, "Кетчуп": 0.5 },
-    "Горчица": { "Аммиак": 0.5, "Отбеливатель": 0.5 },
-    "Соевый соус": { "Соевое молоко": 0.66667, "Серная Кислота": 0.33333 },
-    "Майонез": { "Масло": 0.33333, "Сырое яйцо": 0.4, "Лимонный сок": 0.33333 },
-    "Сироп": { "Древесный сок": 1 },
-    "Винегретная заправка": { "Уксус": 0.33333, "Чёрный перец": 0.33333, "Оливковое масло": 0.33333 },
-    "Приготовленное яйцо": { "Сырое яйцо": 1 },
-    "Соус барбекю": { "Кетчуп": 0.33333, "Сахар": 0.33333, "Уксус": 0.33333 },
-    "Уксус": { "Этанол": 0.5, "Кислород": 0.5 },
-    "Жгучий соус": { "Столовая Соль": 0.33333, "Капсаициновое масло": 0.33333, "Томатный сок": 0.33333 },
-    "Left-4-zed": { "EZ-нутриенты": 0.5, "Радий": "catalyst" },
-    "Диэтиламин": { "Этанол": 0.5, "Аммиак": 0.5 },
-    "Робаст харвест": { "EZ-нутриенты": 0.5, "Серная Кислота": "catalyst" },
-    "EZ-нутриенты": { "Калий": 0.33333, "Фосфор": 0.33333, "Азот": 0.33333 },
-    "Семин": { "Робаст харвест": 0.75, "Криоксадон": 0.08333, "Диэтиламин": 0.75 },
-    "Аммиак": { "Водород": 0.75, "Азот": 0.25 },
-    "Plant-B-gone": { "Токсин": 0.2, "Вода": 0.8 },
-    "Гидроксид натрия": { "Натрий": 0.5, "Гидроксид": 0.5 },
-    "Смех": { "Банановый сок": 0.5, "Сахар": 0.5 },
-    "Бензол": { "Водород": 1, "Углерод": 1 },
-    "Отбеливатель": { "Гидроксид Натрия": 0.2, "Космический Очиститель": 0.4, "Столовая Соль": 0.4 },
-    "Пепел": { "Масло": 1 },
-    "Гидроксид": { "Кислород": 0.5, "Водород": 0.5 },
-    "Уголь": { "Углерод": 1, "Зола": 1 },
-    "Силицид железа": { "Железо": 0.5, "Кремний": 0.5 },
-    "Щёлок": { "Вода": 0.5, "Пепел": 0.5 },
-    "Космическая смазка": { "Вода": 0.33333, "Кислород": 0.33333, "Силицид железа": 0.33333 },
-    "Полиакрилат натрия": { "Кислород": 0.5, "Натрий": 0.25, "Азот": 0.25 },
-    "Карбонат натрия": { "Кислород": 0.25, "Аммиак": 0.25, "Углерод": 0.25, "Столовая Соль": 0.25 },
-    "Артефактный клей": { "Артифексиум": 0.5, "Космический клей": 0.5 },
-    "Лёд": { "Вода": 0.5, "Фризиум": 0.5 },
-    "Ковриний": { "Космический мираж": 0.33333, "Волокно": 0.66666 },
-    "Космический очиститель": { "Вода": 0.5, "Аммиак": 0.5 },
-    "Фенол": { "Бензол": 0.5, "Гидроксид": 0.5 },
-    "Ацетон": { "Масло": 0.5, "Сварочное Топливо": 0.5, "Кислород": 0.5 },
-    "Космический клей": { "Слизь": 0.5, "Космическая смазка": 0.5 }
-};
+/* script.js — SS14 NanoChem Assistant
+ *
+ * Auto-updating chemistry calculator: fetches reagent/reaction/locale files
+ * directly from the fish-station GitHub repository (raw.githubusercontent.com,
+ * CORS-enabled), parses them with fs-parser.js, and builds the recipe database
+ * at runtime. A 24h localStorage cache avoids re-fetching on every visit, and
+ * a bundled reagents-data.json snapshot is used as offline fallback.
+ *
+ * Data source: https://github.com/makura-games/fish-station  (branch master)
+ */
 
-const reactionTemps = {
-    "Сигинат": 370, "Инсузин": 433, "Пиразин": 540, "Дифенгидрамин": 377.59,
-    "Некрозол": 370, "Оппорозидон": 400, "Пунктураз": 325, "Лацеринол": 335,
-    "Алоксадон": 310, "Амбузол Плюс": 310, "Импедрезен": 370, "Гиперзин": 370,
-    "Токсин Немоты": 370, "Дезоксиэфедрин": 370, "Токсин Майндбрейкер": 370,
-    "Столовая Соль": 370, "Бензол": 310, "Силицид Железа": 310, "Гидроксид": 310,
-    "Фризиум": 300, "Когнизин": 370, "Ультраваскулин": 370, "Синаптизин": 370,
-    "Фторсерная кислота": 370, "Фторсурфактант": 370, "Фелиназ": 370, "Каниназ": 370
-};
+(function () {
+  "use strict";
 
-// Дополнительные данные о химикатах
-const chemDescriptions = {
-    "Акриоксарин": "Отвратительно синий криогенный химикат, способный залечивать тяжелые раны даже у мертвых.",
-    "Алоксадон": "Криогенное химическое вещество. Используется для лечения тяжёлых ожогов и обморожений.",
-    "Амбузол": "Высокотехнологичный препарат, способный остановить развитие зомби-вируса.",
-    "Амбузол Плюс": "Разработка будущего с использованием омнизина, прививает живых против инфекции.",
-    "Аритразин": "Слегка нестабильный препарат, применяемый в самых крайних случаях радиационного отравления.",
-    "Бикаридин": "Анальгетик, который очень эффективен при лечении механических повреждений.",
-    "Бруизин": "Изначально разрабатывавшееся как лекарство от кашля, это химическое вещество оказалось необычайно эффективным при лечении ушибов.",
-    "Бритвиум": "Странное неньютоновское химическое вещество. Образуется при смешивании двух противоречивых по природе лекарств.",
-    "Галоперидол": "Выводит из организма большинство стимулирующих и галлюциногенных препаратов.",
-    "Гидроксид Натрия": "Белая соль без запаха, растворяющаяся в воде, образующая при этом сильный щелочной раствор.",
-    "Гиперзин": "Химический коктейль, разработанный компанией Donk Co., который позволяет агентам быстрее оправляться от оглушения.",
-    "Дексалин": "Используется для лечения лёгкого кислородного голодания и кровопотери.",
-    "Дексалин Плюс": "Используется для лечения кислородного голодания и потери крови.",
-    "Дермалин": "Передовой препарат, более эффективный при лечении ожогов, чем Келотан.",
-    "Дифенгидрамин": "Он же димедрол. Быстро очищает организм от гистамина, снижает нервозность и дрожь.",
-    "Диловен": "Антитоксин широкого спектра действия, который лечит поражение организма токсинами.",
-    "Инапровалин": "Синаптический и кардио-стимулятор, широко используемый для купирования удушья.",
-    "Инсузин": "Быстро восстанавливает ткани, омертвевшие в результате поражения электрическим током.",
-    "Иодид Калия": "Снижает разрушительное воздействие радиации на 90%. Используется только в профилактических целях.",
-    "Келотан": "Лечит ожоги. Передозировка значительно снижает способность организма сохранять воду.",
-    "Криоксадон": "Необходим для нормального функционирования криогеники. Исцеляет все стандартные типы повреждений.",
-    "Лацеринол": "Довольно нереактивное химическое вещество, усиливающее синтез коллагена до невероятных уровней.",
-    "Лепоразин": "Химический препарат, используемый для стабилизации температуры тела и быстрого лечения повреждений от холода.",
-    "Маннитол": "Эффективно устраняет повреждения мозга.",
-    "Масло": "Используется поварами для приготовления пищи.",
-    "Некрозол": "Некротическое вещество, которое, похоже, способно излечивать обмороженные трупы.",
-    "Нестабильный Мутаген": "Вызывает мутации при введении в живых людей или растения.",
-    "Пунктураз": "Шипучее химическое вещество, залечивающее колотые ранения.",
-    "Пиразин": "Эффективно лечит ожоги, полученные в самых жарких пожарах.",
-    "Стимуляторы": "Кофеиновый адреналиновый стимулятор, который делает вас быстрее и устойчивее на ногах.",
-    "Транексамовая Кислота": "Препарат, способствующий свёртыванию крови, применяемый для остановки обильного кровотечения.",
-    "Трикордразин": "Стимулятор широкого спектра действия, лечит лёгкие повреждения всех основных типов.",
-    "Фалангимин": "Современный препарат, используемый при лечении рака.",
-    "Физраствор": "Смесь воды с солью. Обычно используется для лечения обезвоживания.",
-    "Фенол": "Ароматическое кольцо углерода с гидроксильной группой. Полезный ингредиент для ряда лекарств.",
-    "Хироналин": "Слабый препарат для лечения радиационного поражения.",
-    "Хлоральгидрат": "Успокаивающее и гипнотическое химическое вещество.",
-    "Эпинефрин": "Эффективный стабилизирующий препарат, используемый для предотвращения смерти от асфиксии.",
-    "Эфедрин": "Кофеиновый адреналиновый стимулятор, который делает вас быстрее и устойчивее на ногах.",
-    "Аммиак": "Эффективное удобрение, дающее растениям питательные вещества.",
-    "Ацетон": "Прозрачная, слегка канцерогенная жидкость. Имеет множество простых способов применения.",
-    "Бензол": "Ароматическое, слегка канцерогенное кольцо углерода.",
-    "Варфарин": "Обычно используется в качестве антикоагулянта.",
-    "Гидроксид": "Сильное щелочное химическое вещество, составляющее основу многих органических соединений.",
-    "Диэтиламин": "Очень мощное удобрение, насыщает растения питательными веществами.",
-    "Столовая Соль": "Хлорид натрия, широко известный как соль, часто используется в качестве пищевой приправы.",
-    "Силицид железа": "Интерметаллическое соединение, обладающее необычными магнитными свойствами.",
-    "Серная Кислота": "Едкий химикат. Держать подальше от лица.",
-    "Уголь": "Чёрное, пористое твёрдое вещество.",
-    "Отбеливатель": "Сверхмощное чистящее средство, которое может очищать полы лучше космического очистителя.",
-    "Космический Очиститель": "Способен очистить почти любую поверхность от всего, что может её запачкать.",
-    "Напалм": "Немножко огнеопасен.",
-    "Пенообразователь": "Делает пену, подобную той, что требуется для гранат с металлической пеной.",
-    "Термит": "Смесь, которая становится крайне горячей при воспламенении.",
-    "Окулин": "Простой солевой раствор, используемый для лечения повреждений глаз.",
-    "Космический мираж": "Запрещённое вещество, вызывающее ряд таких эффектов, как потеря равновесия и нарушения зрения.",
-    "Ковриний": "Таинственный химикат, обычно поставляемый с планеты клоунов, который покрывает ковром всё, на что попадёт."
-};
+  // ---- Config ----
+  var REPO = "makura-games/fish-station";
+  var BRANCH = "master";
+  var RAW_BASE = "https://raw.githubusercontent.com/" + REPO + "/" + BRANCH + "/";
+  var TREE_API = "https://api.github.com/repos/" + REPO + "/git/trees/" + BRANCH + "?recursive=1";
+  var BUNDLED_JSON = "reagents-data.json";
+  var CACHE_KEY = "fschem_data_v1";
+  var FILELIST_KEY = "fschem_filelist_v1";
+  var CACHE_TTL_MS = 24 * 60 * 60 * 1000;       // 24h for built data
+  var FILELIST_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7d for discovered file list
 
-const medLabels = {
-    "Базовая медицина": "",
-    "Дексалин": "(Нехватки воздуха)",
-    "Дермалин": "(Ожоги)",
-    "Бикаридин": "(Механических)",
-    "Трикордразин": "(Универсальное)",
-    "Инапровалин": "(Удушья/Работает только в крит. состояние)",
-    "Инсузин": "(Клетки/Кровь)",
-    "Пунктураз": "(Уколы)",
-    "Окулин": "(Зрение)",
-    "Физраствор": "(Кровь)",
-    "Маннитол": "(Мозговые травмы)",
-    "Иодид Калия": "(Антирад)",
-    "Акриоксарин": "(Мгновенное лечение, крио)",
-    "Алоксадон": "(Стабилизация)",
-    "Амбузол": "(Оживление)",
-    "Амбузол Плюс": "(Полное оживление)",
-    "Аритразин": "(Радиация)",
-    "Бруизин": "(Ушибы)",
-    "Бритвиум": "(Порезы)",
-    "Гиперзин": "(Удушье/Стим)",
-    "Дексалин Плюс": "(Удушья/Кровопотери)",
-    "Диловен": "(Основа лекарств)",
-    "Криоксадон": "(Обморожение, крио)",
-    "Лацеринол": "(Порезы)",
-    "Лепоразин": "(Температура)",
-    "Некрозол": "(Некроз)",
-    "Пиразин": "(Высокая температура)",
-    "Стимуляторы": "(Спринт)",
-    "Транексамовая Кислота": "(Кровотечение)",
-    "Фалангимин": "(Клетки)",
-    "Эпинефрин": "(Шок/Дыхание)",
-    "Галоперидол": "(Усыпление)",
-    "Дифенгидрамин": "(Яды)",
-    "Эфедрин": "(Стимулятор)",
-    "Хлоральгидрат": "(Снотворное)",
-    "Космический мираж": "(Галлюцинации)",
-    "Ковриний": "(Расслабление)",
-    "Напалм": "(Горючее)",
-    "Термит": "(Расплавление)",
-    "Варфарин": "(Внутр. кровотечение)",
-    "Фенол": "(Токсин)",
-    "Нестабильный Мутаген": "(Мутации)",
-    "Хироналин": "(Вирусы)",
-    "Пенообразователь": "(Пожарная пена)",
-    "Отбеливатель": "(Чистящее)",
-    "Космический Очиститель": "(Чистящее)",
-    "Аммиак": "(Реагент)",
-    "Ацетон": "(Реагент)",
-    "Бензол": "(Топливо)",
-    "Гидроксид Натрия": "(Щелочь)",
-    "Гидроксид": "(Реагент)",
-    "Диэтиламин": "(Реагент)",
-    "Столовая Соль": "(Пища)",
-    "Силицид Железа": "(Электроника)",
-    "Серная Кислота": "(Кислота)",
-    "Уголь": "(Топливо)",
-    "Масло": "(Реагент)",
-    // Новые химикаты
-    "Ипекак": "(Рвотное)",
-    "Сигинат": "(Антикислота)",
-    "Сидерлак": "(Противокоррозия)",
-    "Когнизин": "(Разум)",
-    "Ультраваскулин": "(Антитоксин)",
-    "Липозин": "(Метаболизм)",
-    "Криптобиолин": "(Растерянность)",
-    "Синаптизин": "(Оглушение)",
-    "Святая вода": "(Исцеление)",
-    "Карбонат натрия": "(Щелочь)",
-    "Артефактный клей": "(Ремонт)",
-    "Лёд": "(Охлаждение)",
-    "Космический клей": "(Клей)",
-    "Космическая смазка": "(Смазка)",
-    "Полиакрилат натрия": "(Поглотитель)",
-    "Щёлок": "(Мыло)",
-    "Фторсерная кислота": "(Едкое)",
-    "Фризиум": "(Охлаждение)",
-    "Фторсурфактант": "(Пена)",
-    "Фелиназ": "(Токсин)",
-    "Каниназ": "(Токсин)",
-    "Жужжехлориновые пчёлы": "(Пчёлы)",
-    "Тазинид": "(Электричество)",
-    "Геморринол": "(Кровотечение)",
-    "Липолицид": "(Жиросжигатель)",
-    "Лексорин": "(Удушение)",
-    "Ликоксид": "(Аккумулятор)",
-    "Политриновая кислота": "(Едкое)",
-    "Токсин": "(Яд)",
-    "Токсин майндбрейкер": "(Галлюцинации)",
-    "Токсин немоты": "(Немота)",
-    "Пакс": "(Пацифизм)",
-    "Дезоксиэфедрин": "(Стимулятор)",
-    "Норэпинефриновая кислота": "(Слепота)",
-    "Ноктюрин": "(Снотворное)",
-    "Счастье": "(Эйфория)",
-    "Коргиум": "(Пища)",
-    "Импедризин": "(Наркотик)",
-    "Псикодин": "(Психиатрия)",
-    "Кетчуп": "(Пища)",
-    "Холодящий соус": "(Пища)",
-    "Кетчунез": "(Пища)",
-    "Горчица": "(Пища)",
-    "Соевый соус": "(Пища)",
-    "Майонез": "(Пища)",
-    "Сироп": "(Пища)",
-    "Винегретная заправка": "(Пища)",
-    "Приготовленное яйцо": "(Пища)",
-    "Соус барбекю": "(Пища)",
-    "Уксус": "(Пища)",
-    "Жгучий соус": "(Пища)",
-    "Left-4-zed": "(Удобрение)",
-    "Робаст харвест": "(Удобрение)",
-    "EZ-нутриенты": "(Удобрение)",
-    "Семин": "(Удобрение)",
-    "Plant-B-gone": "(Гербицид)"
-};
+  // ---- Hardcoded file list (stable fallback when GitHub API is rate-limited) ----
+  var DEFAULT_REAGENT_FILES = [
+    "Resources/Prototypes/Reagents/Consumable/Drink/alcohol.yml",
+    "Resources/Prototypes/Reagents/Consumable/Drink/base_drink.yml",
+    "Resources/Prototypes/Reagents/Consumable/Drink/drinks.yml",
+    "Resources/Prototypes/Reagents/Consumable/Drink/juice.yml",
+    "Resources/Prototypes/Reagents/Consumable/Drink/soda.yml",
+    "Resources/Prototypes/Reagents/Consumable/Food/condiments.yml",
+    "Resources/Prototypes/Reagents/Consumable/Food/food.yml",
+    "Resources/Prototypes/Reagents/Consumable/Food/ingredients.yml",
+    "Resources/Prototypes/Reagents/Materials/glass.yml",
+    "Resources/Prototypes/Reagents/Materials/materials.yml",
+    "Resources/Prototypes/Reagents/Materials/metals.yml",
+    "Resources/Prototypes/Reagents/Materials/ores.yml",
+    "Resources/Prototypes/Reagents/biological.yml",
+    "Resources/Prototypes/Reagents/botany.yml",
+    "Resources/Prototypes/Reagents/chemicals.yml",
+    "Resources/Prototypes/Reagents/cleaning.yml",
+    "Resources/Prototypes/Reagents/elements.yml",
+    "Resources/Prototypes/Reagents/fun.yml",
+    "Resources/Prototypes/Reagents/gases.yml",
+    "Resources/Prototypes/Reagents/medicine.yml",
+    "Resources/Prototypes/Reagents/narcotics.yml",
+    "Resources/Prototypes/Reagents/pyrotechnic.yml",
+    "Resources/Prototypes/Reagents/toxins.yml",
+  ];
+  var DEFAULT_REACTION_FILES = [
+    "Resources/Prototypes/Recipes/Reactions/biological.yml",
+    "Resources/Prototypes/Recipes/Reactions/botany.yml",
+    "Resources/Prototypes/Recipes/Reactions/chemicals.yml",
+    "Resources/Prototypes/Recipes/Reactions/cleaning.yml",
+    "Resources/Prototypes/Recipes/Reactions/drinks.yml",
+    "Resources/Prototypes/Recipes/Reactions/food.yml",
+    "Resources/Prototypes/Recipes/Reactions/fun.yml",
+    "Resources/Prototypes/Recipes/Reactions/gas.yml",
+    "Resources/Prototypes/Recipes/Reactions/medicine.yml",
+    "Resources/Prototypes/Recipes/Reactions/pyrotechnic.yml",
+    "Resources/Prototypes/Recipes/Reactions/single_reagent.yml",
+    "Resources/Prototypes/Recipes/Reactions/soap.yml",
+  ];
+  var DEFAULT_LOCALE_FILES = [
+    "Resources/Locale/ru-RU/_strings/_fish/reagents/meta/consumable/drink/juice.ftl",
+    "Resources/Locale/ru-RU/_strings/_fish/reagents/meta/gases.ftl",
+    "Resources/Locale/ru-RU/_strings/_sunrise/reagents/meta/biological.ftl",
+    "Resources/Locale/ru-RU/_strings/_sunrise/reagents/meta/consumable/drink/alcohol.ftl",
+    "Resources/Locale/ru-RU/_strings/_sunrise/reagents/meta/consumable/drink/drinks.ftl",
+    "Resources/Locale/ru-RU/_strings/_sunrise/reagents/meta/consumable/drink/soda.ftl",
+    "Resources/Locale/ru-RU/_strings/_sunrise/reagents/meta/consumable/food/condiments.ftl",
+    "Resources/Locale/ru-RU/_strings/_sunrise/reagents/meta/fun.ftl",
+    "Resources/Locale/ru-RU/_strings/_sunrise/reagents/meta/gases.ftl",
+    "Resources/Locale/ru-RU/_strings/_sunrise/reagents/meta/medicine.ftl",
+    "Resources/Locale/ru-RU/_strings/_sunrise/reagents/meta/physical-desc.ftl",
+    "Resources/Locale/ru-RU/_strings/_sunrise/reagents/meta/toxins.ftl",
+    "Resources/Locale/ru-RU/_strings/reagents/meta/biological.ftl",
+    "Resources/Locale/ru-RU/_strings/reagents/meta/botany.ftl",
+    "Resources/Locale/ru-RU/_strings/reagents/meta/chemicals.ftl",
+    "Resources/Locale/ru-RU/_strings/reagents/meta/cleaning.ftl",
+    "Resources/Locale/ru-RU/_strings/reagents/meta/consumable/drink/alcohol.ftl",
+    "Resources/Locale/ru-RU/_strings/reagents/meta/consumable/drink/drinks.ftl",
+    "Resources/Locale/ru-RU/_strings/reagents/meta/consumable/drink/juice.ftl",
+    "Resources/Locale/ru-RU/_strings/reagents/meta/consumable/drink/soda.ftl",
+    "Resources/Locale/ru-RU/_strings/reagents/meta/consumable/food/condiments.ftl",
+    "Resources/Locale/ru-RU/_strings/reagents/meta/consumable/food/food.ftl",
+    "Resources/Locale/ru-RU/_strings/reagents/meta/consumable/food/ingredients.ftl",
+    "Resources/Locale/ru-RU/_strings/reagents/meta/elements.ftl",
+    "Resources/Locale/ru-RU/_strings/reagents/meta/fun.ftl",
+    "Resources/Locale/ru-RU/_strings/reagents/meta/gases.ftl",
+    "Resources/Locale/ru-RU/_strings/reagents/meta/medicine.ftl",
+    "Resources/Locale/ru-RU/_strings/reagents/meta/narcotics.ftl",
+    "Resources/Locale/ru-RU/_strings/reagents/meta/physical-desc.ftl",
+    "Resources/Locale/ru-RU/_strings/reagents/meta/pyrotechnic.ftl",
+    "Resources/Locale/ru-RU/_strings/reagents/meta/toxins.ftl",
+  ];
 
-const chemCategories = {
-    "Базовая медицина": [
-        "Бикаридин", "Дермалин", "Дексалин", "Трикордразин", "Инапровалин",
-        "Инсузин", "Пунктураз", "Окулин", "Физраствор", "Маннитол", "Иодид Калия"
-    ],
-    "Продвинутая медицина": [
-        "Акриоксарин", "Алоксадон", "Амбузол", "Амбузол Плюс", "Аритразин",
-        "Бруизин", "Бритвиум", "Гиперзин", "Дексалин Плюс", "Диловен",
-        "Криоксадон", "Лацеринол", "Лепоразин", "Некрозол", "Пиразин",
-        "Стимуляторы", "Транексамовая Кислота", "Фалангимин", "Эпинефрин", "Дифенгидрамин",
-        "Сигинат", "Сидерлак", "Когнизин", "Ультраваскулин", "Синаптизин"
-    ],
-    "Наркотики": [
-        "Галоперидол", "Эфедрин", "Хлоральгидрат",
-        "Космический мираж", "Ковриний", "Счастье", "Ноктюрин", "Коргиум", "Импедризин", "Псикодин"
-    ],
-    "Пиротехника": ["Напалм", "Термит"],
-    "Токсины": [
-        "Варфарин", "Фенол", "Нестабильный Мутаген", "Хироналин", "Фелиназ", "Каниназ",
-        "Жужжехлориновые пчёлы", "Тазинид", "Геморринол", "Липолицид", "Лексорин", "Ликоксид",
-        "Серная Кислота", "Токсин", "Токсин майндбрейкер", "Токсин немоты", "Пакс", "Дезоксиэфедрин",
-        "Норэпинефриновая кислота", "Политриновая кислота", "Фризиум", "Фторсерная кислота"
-    ],
-    "Пищевые": [
-        "Кетчуп", "Холодящий соус", "Кетчунез", "Горчица", "Соевый соус", "Майонез",
-        "Сироп", "Винегретная заправка", "Приготовленное яйцо", "Соус барбекю", "Уксус", "Жгучий соус"
-    ],
-    "Ботанические": [
-        "Left-4-zed", "Диэтиламин", "Робаст харвест", "EZ-нутриенты", "Семин", "Аммиак", "Plant-B-gone"
-    ],
-    "Биологические": ["Нестабильный Мутаген", "Хироналин"],
-    "Специальные": [
-        "Пенообразователь", "Отбеливатель", "Космический Очиститель", "Космический клей",
-        "Космическая смазка", "Полиакрилат натрия", "Щёлок", "Фторсурфактант", "Артефактный клей",
-        "Лёд", "Ковриний", "Святая вода", "Карбонат натрия", "Фенол", "Ацетон"
-    ],
-    "Прочее": [
-        "Ипекак", "Криптобиолин", "Гидроксид натрия", "Смех", "Бензол", "Пепел", "Уголь",
-        "Силицид железа", "Криоксадон", "Кровь", "Кровь зомби", "Кровь насекомого", "Сварочное топливо",
-        "Золото", "Серебро", "Цинк", "Уран", "Плазма", "Аллицин", "Алоэ", "Анаэробная кровь",
-        "Артифексиум", "Банановый сок", "Вестин", "Витамины", "Волокно", "Гистамин", "Голубая кровь",
-        "Древесный сок", "Жир", "Капсаициновое масло", "Карпотоксин", "Кофе", "Молотые пчёлы",
-        "Морозное масло", "Непрожаренные животные протеины", "Оливковое масло", "Омнизин",
-        "Саксонит", "Слизь", "Соевое молоко", "Сок, заставляющий говорить Вех", "Стеллибинин",
-        "Сырое яйцо", "Томатный сок", "Универсальный фермент", "Фрезон", "Чёрный перец", "Ядерная кола"
-    ]
-};
+  var REAGENT_RE = /^Resources\/Prototypes\/Reagents\/.*\.yml$/;
+  var REACTION_RE = /^Resources\/Prototypes\/Recipes\/Reactions\/.*\.yml$/;
+  var LOCALE_RE = /^Resources\/Locale\/ru-RU\/_strings\/(_sunrise\/)?reagents\/meta\/.*\.ftl$/;
+  var LOCALE_FISH_RE = /^Resources\/Locale\/ru-RU\/_strings\/_fish\/reagents\/.*\.ftl$/;
 
-const categoryOrder = [
-    "Базовая медицина", "Продвинутая медицина", "Наркотики", "Пиротехника",
-    "Токсины", "Пищевые", "Ботанические", "Биологические", "Специальные", "Прочее"
-];
+  // ---- Mutable data globals (populated by loadData) ----
+  var materials = {};
+  var reactionTemps = {};
+  var chemDescriptions = {};
+  var medLabels = {};
+  var chemCategories = {};
+  var categoryOrder = [];
+  var dataMeta = null;
 
-let selectEl, amountEl, roundUpEl, resultsArea;
+  // ---- DOM refs ----
+  var selectEl, amountEl, roundUpEl, resultsArea, refreshBtn, statusEl;
 
-function calculateRecipe(targetName, targetAmount, isRoundUp) {
-    const baseMultipliers = {};
+  // ============================================================
+  //  Data loading
+  // ============================================================
 
-    function snapToGrid(val, decimals = 2) {
-        const factor = Math.pow(10, decimals);
-        return Math.round(val * factor) / factor;
+  function readCache() {
+    try {
+      var raw = localStorage.getItem(CACHE_KEY);
+      if (!raw) return null;
+      var obj = JSON.parse(raw);
+      if (!obj || !obj.data || !obj.ts) return null;
+      return obj;
+    } catch (e) { return null; }
+  }
+  function writeCache(data) {
+    try {
+      localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data: data }));
+    } catch (e) { /* quota / private mode */ }
+  }
+  function clearCache() { try { localStorage.removeItem(CACHE_KEY); } catch (e) {} }
+
+  function readCachedFileList() {
+    try {
+      var raw = localStorage.getItem(FILELIST_KEY);
+      if (!raw) return null;
+      var obj = JSON.parse(raw);
+      if (!obj || !obj.ts || !obj.files) return null;
+      return obj;
+    } catch (e) { return null; }
+  }
+  function writeCachedFileList(obj) {
+    try {
+      localStorage.setItem(FILELIST_KEY, JSON.stringify({ ts: Date.now(), files: obj.files, commit: obj.commit, commitDate: obj.commitDate }));
+    } catch (e) {}
+  }
+
+  // Discover the file list via the GitHub trees API (ONE call, cached 7 days).
+  // Also captures the commit SHA from the same response so we don't need a
+  // second API call. Falls back to the hardcoded list on any failure.
+  function discoverFiles() {
+    var cached = readCachedFileList();
+    if (cached && (Date.now() - cached.ts) < FILELIST_TTL_MS) {
+      return Promise.resolve({ files: cached.files, commit: cached.commit || "live", commitDate: cached.commitDate || "" });
+    }
+    return fetch(TREE_API, { headers: { "Accept": "application/vnd.github+json" } })
+      .then(function (r) {
+        if (!r.ok) throw new Error("tree API " + r.status);
+        return r.json();
+      })
+      .then(function (j) {
+        if (!j || !j.tree) throw new Error("bad tree");
+        var rf = [], xf = [], lf = [];
+        j.tree.forEach(function (e) {
+          if (e.type !== "blob") return;
+          var p = e.path;
+          if (REAGENT_RE.test(p)) rf.push(p);
+          else if (REACTION_RE.test(p)) xf.push(p);
+          else if (LOCALE_RE.test(p) || LOCALE_FISH_RE.test(p)) lf.push(p);
+        });
+        rf.sort(); xf.sort(); lf.sort();
+        if (rf.length === 0 || xf.length === 0) throw new Error("empty tree");
+        var files = { reagentFiles: rf, reactionFiles: xf, localeFiles: lf };
+        var commit = (j.sha && typeof j.sha === "string") ? j.sha.substring(0, 7) : "live";
+        writeCachedFileList({ files: files, commit: commit, commitDate: "" });
+        return { files: files, commit: commit, commitDate: "" };
+      })
+      .catch(function () {
+        return {
+          files: {
+            reagentFiles: DEFAULT_REAGENT_FILES.slice(),
+            reactionFiles: DEFAULT_REACTION_FILES.slice(),
+            localeFiles: DEFAULT_LOCALE_FILES.slice(),
+          },
+          commit: "live", commitDate: "",
+        };
+      });
+  }
+
+  function fetchText(url) {
+    return fetch(url).then(function (r) {
+      if (!r.ok) throw new Error(url + " -> " + r.status);
+      return r.text();
+    });
+  }
+
+  function fetchAllFiles(fileList, onProgress) {
+    var paths = fileList.reagentFiles
+      .map(function (p) { return { kind: "reagent", path: p }; })
+      .concat(fileList.reactionFiles.map(function (p) { return { kind: "reaction", path: p }; }))
+      .concat(fileList.localeFiles.map(function (p) { return { kind: "locale", path: p }; }));
+
+    var total = paths.length, done = 0;
+    return Promise.all(paths.map(function (item) {
+      return fetchText(RAW_BASE + item.path).then(function (text) {
+        done++;
+        if (onProgress) onProgress(done, total, item.path);
+        return { kind: item.kind, path: item.path, text: text };
+      });
+    })).then(function (results) {
+      var reagentFiles = [], reactionFiles = [], localeFiles = [];
+      results.forEach(function (r) {
+        if (r.kind === "reagent") reagentFiles.push(r);
+        else if (r.kind === "reaction") reactionFiles.push(r);
+        else localeFiles.push(r);
+      });
+      return { reagentFiles: reagentFiles, reactionFiles: reactionFiles, localeFiles: localeFiles };
+    });
+  }
+
+
+  function applyData(data, source) {
+    materials = data.materials || {};
+    reactionTemps = data.reactionTemps || {};
+    chemDescriptions = data.chemDescriptions || {};
+    medLabels = data.medLabels || {};
+    chemCategories = data.chemCategories || {};
+    categoryOrder = data.categoryOrder || [];
+    dataMeta = data.meta || null;
+    dataMeta = dataMeta || {};
+    dataMeta._source = source;
+  }
+
+  function loadBundled() {
+    return fetch(BUNDLED_JSON).then(function (r) {
+      if (!r.ok) throw new Error("bundled " + r.status);
+      return r.json();
+    });
+  }
+
+  function loadData(forceRefresh) {
+    setStatus("Загрузка данных…", "loading");
+
+    // 1. fresh cache?
+    if (!forceRefresh) {
+      var c = readCache();
+      if (c && (Date.now() - c.ts) < CACHE_TTL_MS) {
+        applyData(c.data, "cache");
+        return finishLoad();
+      }
     }
 
-    function getMultipliers(name, amount) {
-        const recipe = materials[name];
-        if (!recipe) {
-            baseMultipliers[name] = (baseMultipliers[name] || 0) + amount;
-            return;
-        }
+    // 2. fetch fresh from repo
+    return discoverFiles()
+      .then(function (disc) {
+        return fetchAllFiles(disc.files, function (done, total, p) {
+          setStatus("Загрузка из репозитория… " + done + "/" + total, "loading");
+        }).then(function (files) {
+          var data = FsParser.buildData(files, { commit: disc.commit, commitDate: disc.commitDate });
+          writeCache(data);
+          applyData(data, "repo");
+          return finishLoad();
+        });
+      })
+      .catch(function (err) {
+        // 3. fallback to bundled snapshot
+        return loadBundled()
+          .then(function (data) {
+            applyData(data, "bundled");
+            return finishLoad();
+          })
+          .catch(function (err2) {
+            setStatus("Не удалось загрузить данные. Проверьте подключение к интернету и нажмите «Обновить».", "error");
+            console.error("loadData failed:", err, err2);
+          });
+      });
+  }
 
-        for (let ingName in recipe) {
-            if (recipe[ingName] === "catalyst") continue;
-            const needed = amount * recipe[ingName];
-            getMultipliers(ingName, needed);
-        }
+  function finishLoad() {
+    if (!materials || Object.keys(materials).length === 0) {
+      setStatus("Данные пусты.", "error");
+      return;
+    }
+    initSelect();
+    updateCalculation();
+    renderStatusBadge();
+    setStatus("", "ok");
+  }
+
+  // ============================================================
+  //  Status badge + refresh
+  // ============================================================
+
+  function renderStatusBadge() {
+    if (!dataMeta) return;
+    var src = dataMeta._source || "?";
+    var srcLabel = { repo: "репозиторий (live)", cache: "кэш", bundled: "локальный снимок" }[src] || src;
+    var commit = dataMeta.commit || "";
+    var isSha = /^[0-9a-f]{7,40}$/i.test(commit);
+    var commitLine = isSha
+      ? "Коммит: <code>" + commit + "</code>"
+      : "Ветка: <code>" + BRANCH + "</code>";
+    var gen = dataMeta.generatedAt ? new Date(dataMeta.generatedAt) : null;
+    var genTxt = gen ? gen.toLocaleDateString("ru-RU") + " " + gen.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" }) : "";
+    var count = dataMeta.recipeCount || Object.keys(materials).length;
+    var html = "<div class='data-badge'><span class='badge-src badge-" + src + "'>Источник: " + srcLabel + "</span>" +
+      "<span class='badge-meta'>" + commitLine + "</span>" +
+      "<span class='badge-meta'>Рецептов: " + count + "</span>" +
+      (genTxt ? "<span class='badge-meta'>Обновлено: " + genTxt + "</span>" : "") +
+      "</div>";
+    if (statusEl) statusEl.innerHTML = html;
+  }
+
+  function setStatus(text, kind) {
+    if (!statusEl) return;
+    if (kind === "ok") { /* keep badge */ return; }
+    if (text) {
+      statusEl.innerHTML = "<div class='data-status data-status-" + kind + "'>" + text + "</div>";
+    } else {
+      statusEl.innerHTML = "";
+    }
+  }
+
+  // ============================================================
+  //  Calculation (preserved from original calculator)
+  // ============================================================
+
+  function snapToGrid(val, decimals) {
+    decimals = decimals || 2;
+    var factor = Math.pow(10, decimals);
+    return Math.round(val * factor) / factor;
+  }
+
+  function calculateRecipe(targetName, targetAmount, isRoundUp) {
+    var baseMultipliers = {};
+
+    function getMultipliers(name, amount) {
+      var recipe = materials[name];
+      if (!recipe) {
+        baseMultipliers[name] = (baseMultipliers[name] || 0) + amount;
+        return;
+      }
+      for (var ingName in recipe) {
+        if (recipe[ingName] === "catalyst") continue;
+        var needed = amount * recipe[ingName];
+        getMultipliers(ingName, needed);
+      }
     }
 
     getMultipliers(targetName, targetAmount);
 
-    const actualBases = {};
-    for (let base in baseMultipliers) {
-        const exactNeed = snapToGrid(baseMultipliers[base], 2); 
-        actualBases[base] = isRoundUp ? Math.ceil(exactNeed) : Math.floor(exactNeed);
+    var actualBases = {};
+    for (var base in baseMultipliers) {
+      var exactNeed = snapToGrid(baseMultipliers[base], 2);
+      actualBases[base] = isRoundUp ? Math.ceil(exactNeed) : Math.floor(exactNeed);
     }
 
-    const topoOrder = [];
-    const visited = new Set();
-
+    var topoOrder = [];
+    var visited = {};
     function buildTopo(name) {
-        if (visited.has(name)) return;
-        visited.add(name);
-        const recipe = materials[name];
-        if (!recipe) return; 
-
-        for (let ingName in recipe) {
-            if (recipe[ingName] !== "catalyst") buildTopo(ingName);
-        }
-        topoOrder.push(name);
+      if (visited[name]) return;
+      visited[name] = true;
+      var recipe = materials[name];
+      if (!recipe) return;
+      for (var ingName in recipe) {
+        if (recipe[ingName] !== "catalyst") buildTopo(ingName);
+      }
+      topoOrder.push(name);
     }
-
     buildTopo(targetName);
 
-    const yields = { ...actualBases };
-    const stepsData = {};
+    var yields = Object.assign({}, actualBases);
+    var stepsData = {};
 
-    for (let name of topoOrder) {
-        const recipe = materials[name];
-        
-        let totalRatio = 0;
-        for (let k in recipe) {
-            if (recipe[k] !== "catalyst") totalRatio += recipe[k];
+    for (var i = 0; i < topoOrder.length; i++) {
+      var name = topoOrder[i];
+      var recipe = materials[name];
+      var totalRatio = 0;
+      for (var k in recipe) {
+        if (recipe[k] !== "catalyst") totalRatio += recipe[k];
+      }
+      var limitingVolume = Infinity;
+      var stepIngredients = {};
+      for (var ingName in recipe) {
+        if (recipe[ingName] === "catalyst") {
+          stepIngredients[ingName] = { amount: 1, isCatalyst: true };
+          continue;
         }
-
-        let limitingVolume = Infinity;
-        const stepIngredients = {};
-
-        for (let ingName in recipe) {
-            if (recipe[ingName] === "catalyst") {
-                stepIngredients[ingName] = { amount: 1, isCatalyst: true };
-                continue;
-            }
-
-            const have = yields[ingName] || 0;
-            const needRatio = recipe[ingName];
-            const maxPossible = have / needRatio;
-
-            if (maxPossible < limitingVolume) {
-                limitingVolume = maxPossible;
-            }
+        var have = yields[ingName] || 0;
+        var needRatio = recipe[ingName];
+        var maxPossible = have / needRatio;
+        if (maxPossible < limitingVolume) limitingVolume = maxPossible;
+      }
+      if (limitingVolume === Infinity) limitingVolume = 0;
+      var rawYield = limitingVolume * totalRatio;
+      var actualYield = Math.floor(snapToGrid(rawYield, 2) + 0.001);
+      yields[name] = actualYield;
+      for (var ingName2 in recipe) {
+        if (recipe[ingName2] === "catalyst") continue;
+        var useAmount = Math.floor(snapToGrid(limitingVolume * recipe[ingName2], 2) + 0.001);
+        stepIngredients[ingName2] = { amount: useAmount, isCatalyst: false };
+        if (!materials[ingName2]) {
+          actualBases[ingName2] = actualBases[ingName2] || 0;
         }
-
-        if (limitingVolume === Infinity) limitingVolume = 0;
-
-        const rawYield = limitingVolume * totalRatio;
-        const actualYield = Math.floor(snapToGrid(rawYield, 2) + 0.001);
-        yields[name] = actualYield;
-
-        for (let ingName in recipe) {
-            if (recipe[ingName] === "catalyst") continue;
-            const useAmount = Math.floor(snapToGrid(limitingVolume * recipe[ingName], 2) + 0.001);
-            stepIngredients[ingName] = { amount: useAmount, isCatalyst: false };
-            
-            if (!materials[ingName]) {
-                actualBases[ingName] = (actualBases[ingName] || 0);
-            }
-        }
-
-        const catalystVol = Object.values(stepIngredients).filter(i => i.isCatalyst).reduce((s, i) => s + i.amount, 0);
-
-        stepsData[name] = {
-            yield: actualYield,
-            ingredients: stepIngredients,
-            mixVolume: actualYield + catalystVol,
-            catalystVolume: catalystVol
-        };
+      }
+      var catalystVol = 0;
+      for (var sk in stepIngredients) {
+        if (stepIngredients[sk].isCatalyst) catalystVol += stepIngredients[sk].amount;
+      }
+      stepsData[name] = {
+        yield: actualYield,
+        ingredients: stepIngredients,
+        mixVolume: actualYield + catalystVol,
+        catalystVolume: catalystVol,
+      };
     }
 
-    const displaySteps = topoOrder.map(name => {
-        const data = stepsData[name];
-        const finalIngredients = {};
-        for (let ing in data.ingredients) {
-            finalIngredients[ing] = data.ingredients[ing].amount;
-        }
-        return {
-            name: name,
-            ingredients: materials[name],
-            finalIngredients: finalIngredients,
-            finalVolume: data.yield,
-            mixVolume: data.mixVolume,
-            catalystVolume: data.catalystVolume
-        };
+    var displaySteps = topoOrder.map(function (name) {
+      var d = stepsData[name];
+      var finalIngredients = {};
+      for (var ing in d.ingredients) finalIngredients[ing] = d.ingredients[ing].amount;
+      return {
+        name: name,
+        ingredients: materials[name],
+        finalIngredients: finalIngredients,
+        finalVolume: d.yield,
+        mixVolume: d.mixVolume,
+        catalystVolume: d.catalystVolume,
+      };
     });
 
-    const finalStep = displaySteps[displaySteps.length - 1];
-    
-    return { displaySteps, shoppingList: actualBases, finalStep };
-}
+    var finalStep = displaySteps[displaySteps.length - 1];
+    return { displaySteps: displaySteps, shoppingList: actualBases, finalStep: finalStep };
+  }
 
-function initSelect() {
-    selectEl.innerHTML = '';
-    const addedChemicals = new Set();
+  // ============================================================
+  //  UI
+  // ============================================================
 
-    categoryOrder.forEach(catName => {
-        let chems = chemCategories[catName];
-        if (catName === "Прочее") {
-            chems = Object.keys(materials).filter(k => !addedChemicals.has(k));
+  function initSelect() {
+    selectEl.innerHTML = "";
+    var added = {};
+    categoryOrder.forEach(function (catName) {
+      var chems = chemCategories[catName];
+      if (catName === "Прочее") {
+        chems = Object.keys(materials).filter(function (k) { return !added[k]; });
+      }
+      if (!chems || chems.length === 0) return;
+      chems.sort();
+      var group = document.createElement("optgroup");
+      group.label = catName;
+      chems.forEach(function (med) {
+        if (materials[med]) {
+          var opt = document.createElement("option");
+          opt.value = med;
+          opt.textContent = med;
+          group.appendChild(opt);
+          added[med] = true;
         }
-        chems.sort();
-
-        if (chems.length > 0) {
-            const group = document.createElement('optgroup');
-            group.label = catName;
-            chems.forEach(med => {
-                if (materials[med]) {
-                    const opt = document.createElement('option');
-                    opt.value = med;
-                    opt.textContent = med; 
-                    group.appendChild(opt);
-                    addedChemicals.add(med);
-                }
-            });
-            selectEl.appendChild(group);
-        }
+      });
+      if (group.childNodes.length) selectEl.appendChild(group);
     });
-
     if (selectEl.options.length > 0) selectEl.selectedIndex = 0;
-}
+  }
 
-function updateCalculation() {
+  function updateCalculation() {
     if (!selectEl || !amountEl || !resultsArea) return;
+    if (!materials || Object.keys(materials).length === 0) return;
 
-    const medName = selectEl.value;
-    const requestAmount = parseInt(amountEl.value) || 200;
-    const isRoundUp = roundUpEl.checked;
+    var medName = selectEl.value;
+    var requestAmount = parseInt(amountEl.value, 10) || 200;
+    var isRoundUp = roundUpEl.checked;
 
     if (!materials[medName]) {
-        resultsArea.innerHTML = `<div style="text-align:center; padding: 3rem; color: var(--text-muted);">Вещество не найдено в базе данных.</div>`;
-        return;
+      resultsArea.innerHTML = "<div style='text-align:center; padding: 3rem; color: var(--text-muted);'>Вещество не найдено в базе данных.</div>";
+      return;
     }
 
-    const { displaySteps, shoppingList, finalStep } = calculateRecipe(medName, requestAmount, isRoundUp);
+    var res = calculateRecipe(medName, requestAmount, isRoundUp);
+    var displaySteps = res.displaySteps, shoppingList = res.shoppingList, finalStep = res.finalStep;
 
-    const shopHtml = Object.keys(shoppingList).sort()
-        .map(ing => `<tr><td>${ing}</td><td style="color:var(--accent); font-weight:bold;">${shoppingList[ing]} u</td></tr>`)
-        .join('');
+    var shopHtml = Object.keys(shoppingList).sort()
+      .map(function (ing) {
+        return "<tr><td>" + ing + "</td><td style='color:var(--accent); font-weight:bold;'>" + shoppingList[ing] + " u</td></tr>";
+      }).join("");
 
-    const requestMatches = (finalStep.finalVolume === requestAmount);
-    let modeText = isRoundUp ? "С запасом" : "Строгое";
-
-    let warningHtml = '';
+    var requestMatches = (finalStep.finalVolume === requestAmount);
+    var modeText = isRoundUp ? "С запасом" : "Строгое";
+    var warningHtml = "";
     if (!requestMatches && finalStep.finalVolume < requestAmount) {
-        warningHtml = `<div class="volume-warning">Получено меньше из-за пропорций и округления базовых элементов.</div>`;
+      warningHtml = "<div class='volume-warning'>Получено меньше из-за пропорций и округления базовых элементов.</div>";
     }
 
-    let stepsHtml = '';
-
+    var stepsHtml = "";
     if (displaySteps.length === 0) {
-        stepsHtml = '<div style="color: var(--text-muted);">Это базовый реагент.</div>';
+      stepsHtml = "<div style='color: var(--text-muted);'>Это базовый реагент.</div>";
     } else {
-        displaySteps.forEach((step) => {
-            const isFinal = step.name === medName;
-            let pillsHtml = '';
-
-            for (let ingName in step.finalIngredients) {
-                const amount = step.finalIngredients[ingName];
-                if (amount && amount > 0) {
-                    const isCreated = materials[ingName];
-                    const isCatalyst = (step.ingredients[ingName] === "catalyst");
-
-                    let note = '';
-                    let className = '';
-
-                    if (isCatalyst) {
-                        note = '(Катализатор)';
-                        className = 'catalyst';
-                    } else if (isCreated) {
-                        note = '(Создано)';
-                    }
-
-                    pillsHtml += `<div class="ing-pill ${className}"><span class="ing-name">${ingName}</span> <span>${amount}u</span> ${note}</div>`;
-                }
-            }
-
-            let tempHtml = '';
-            if (reactionTemps[step.name]) {
-                tempHtml = `<span class="temp-badge">🔥 ${reactionTemps[step.name]}K</span>`;
-            }
-
-            const titleClass = isFinal ? 'step-final' : '';
-
-            let mixInfoHtml = '';
-            if (step.catalystVolume > 0) {
-                mixInfoHtml = `<div class="step-mix-info">Всего в смеси: ${step.mixVolume}u (включая ${step.catalystVolume}u катализатора)</div>`;
-            }
-
-            stepsHtml += `
-                <div class="step-item">
-                    <div class="step-marker"></div>
-                    <div class="step-header">
-                        <span class="${titleClass}">${step.name} (${step.finalVolume}u)</span>
-                        ${tempHtml}
-                    </div>
-                    ${mixInfoHtml}
-                    <div class="step-ingredients">${pillsHtml}</div>
-                </div>
-            `;
-        });
+      displaySteps.forEach(function (step) {
+        var isFinal = step.name === medName;
+        var pillsHtml = "";
+        for (var ingName in step.finalIngredients) {
+          var amount = step.finalIngredients[ingName];
+          if (amount && amount > 0) {
+            var isCreated = materials[ingName];
+            var isCatalyst = (step.ingredients[ingName] === "catalyst");
+            var note = "", className = "";
+            if (isCatalyst) { note = "(Катализатор)"; className = "catalyst"; }
+            else if (isCreated) { note = "(Создано)"; }
+            pillsHtml += "<div class='ing-pill " + className + "'><span class='ing-name'>" + ingName + "</span> <span>" + amount + "u</span> " + note + "</div>";
+          }
+        }
+        var tempHtml = "";
+        if (reactionTemps[step.name]) {
+          tempHtml = "<span class='temp-badge'>🔥 " + reactionTemps[step.name] + "K</span>";
+        }
+        var titleClass = isFinal ? "step-final" : "";
+        var mixInfoHtml = "";
+        if (step.catalystVolume > 0) {
+          mixInfoHtml = "<div class='step-mix-info'>Всего в смеси: " + step.mixVolume + "u (включая " + step.catalystVolume + "u катализатора)</div>";
+        }
+        stepsHtml += "<div class='step-item'><div class='step-marker'></div><div class='step-header'><span class='" + titleClass + "'>" + step.name + " (" + step.finalVolume + "u)</span>" + tempHtml + "</div>" + mixInfoHtml + "<div class='step-ingredients'>" + pillsHtml + "</div></div>";
+      });
     }
 
-    const descriptionHtml = medLabels[medName] 
-        ? `<div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; font-weight: normal;">${medLabels[medName]}</div>` 
-        : '';
+    var descriptionHtml = medLabels[medName]
+      ? "<div style='font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; font-weight: normal;'>" + medLabels[medName] + "</div>"
+      : "";
+    var fullDesc = chemDescriptions[medName]
+      ? "<div style='font-size: 0.8rem; color: var(--text-muted); margin-top: 6px; line-height:1.4;'>" + chemDescriptions[medName] + "</div>"
+      : "";
 
-    const html = `
-        <div class="card">
-            <div class="card-header">
-                <div>
-                    <h2 style="margin:0">${medName}</h2>
-                    ${descriptionHtml}
-                </div>
-                <div style="text-align:right">
-                    <div class="volume-main">${finalStep.finalVolume || 0} u</div>
-                    ${!requestMatches ? `<div class="volume-sub">Запрос: ${requestAmount}u</div>` : ''}
-                    <div class="volume-sub" style="opacity:0.6">Режим: ${modeText}</div>
-                    ${warningHtml}
-                </div>
-            </div>
-            <div class="card-body">
-                <h3 style="margin-top:0">🛒 Базовые элементы</h3>
-                <p class="info-text">Базовые реагенты, которые нужно взять из диспенсеров.</p>
-                <table>
-                    <thead><tr><th>Вещество</th><th>Кол-во</th></tr></thead>
-                    <tbody>${shopHtml}</tbody>
-                </table>
-                <hr style="border:0; border-top:1px solid var(--border); margin: 2rem 0;">
-                <h3 style="margin-top:0">⚗️ Пошаговое приготовление</h3>
-                <div class="steps-container">${stepsHtml}</div>
-            </div>
-        </div>
-    `;
-    resultsArea.innerHTML = html;
-}
+    resultsArea.innerHTML =
+      "<div class='card'>" +
+        "<div class='card-header'>" +
+          "<div><h2 style='margin:0'>" + medName + "</h2>" + descriptionHtml + fullDesc + "</div>" +
+          "<div style='text-align:right'>" +
+            "<div class='volume-main'>" + (finalStep.finalVolume || 0) + " u</div>" +
+            (requestMatches ? "" : "<div class='volume-sub'>Запрос: " + requestAmount + "u</div>") +
+            "<div class='volume-sub' style='opacity:0.6'>Режим: " + modeText + "</div>" +
+            warningHtml +
+          "</div>" +
+        "</div>" +
+        "<div class='card-body'>" +
+          "<h3 style='margin-top:0'>🛒 Базовые элементы</h3>" +
+          "<p class='info-text'>Базовые реагенты, которые нужно взять из диспенсеров.</p>" +
+          "<table><thead><tr><th>Вещество</th><th>Кол-во</th></tr></thead><tbody>" + shopHtml + "</tbody></table>" +
+          "<hr style='border:0; border-top:1px solid var(--border); margin: 2rem 0;'>" +
+          "<h3 style='margin-top:0'>⚗️ Пошаговое приготовление</h3>" +
+          "<div class='steps-container'>" + stepsHtml + "</div>" +
+        "</div>" +
+      "</div>";
+  }
 
-window.addEventListener('DOMContentLoaded', () => {
-    selectEl = document.getElementById('medicineSelect');
-    amountEl = document.getElementById('targetAmount');
-    roundUpEl = document.getElementById('roundUpMode');
-    resultsArea = document.getElementById('resultsArea');
+  // ============================================================
+  //  Init
+  // ============================================================
+
+  window.addEventListener("DOMContentLoaded", function () {
+    selectEl = document.getElementById("medicineSelect");
+    amountEl = document.getElementById("targetAmount");
+    roundUpEl = document.getElementById("roundUpMode");
+    resultsArea = document.getElementById("resultsArea");
+    refreshBtn = document.getElementById("refreshBtn");
+    statusEl = document.getElementById("dataStatus");
 
     if (!selectEl || !amountEl || !resultsArea) {
-        console.error("Критическая ошибка: Не найдены элементы DOM.");
-        return;
+      console.error("Критическая ошибка: Не найдены элементы DOM.");
+      return;
     }
 
-    initSelect();
-    updateCalculation();
+    if (refreshBtn) {
+      refreshBtn.addEventListener("click", function () {
+        refreshBtn.disabled = true;
+        clearCache();
+        resultsArea.innerHTML = "<div style='text-align:center; padding: 3rem; color: var(--text-muted);'>Обновление данных…</div>";
+        loadData(true).then(function () {
+          refreshBtn.disabled = false;
+        });
+      });
+    }
 
-    selectEl.addEventListener('change', updateCalculation);
-    amountEl.addEventListener('input', updateCalculation);
-    roundUpEl.addEventListener('change', updateCalculation);
-});
+    selectEl.addEventListener("change", updateCalculation);
+    amountEl.addEventListener("input", updateCalculation);
+    roundUpEl.addEventListener("change", updateCalculation);
+
+    resultsArea.innerHTML = "<div style='text-align:center; padding: 3rem; color: var(--text-muted);'>Загрузка данных из репозитория…</div>";
+    loadData(false);
+  });
+
+  // expose for debugging
+  window.FsChem = {
+    refresh: function () { clearCache(); return loadData(true); },
+    getData: function () { return { materials: materials, reactionTemps: reactionTemps, meta: dataMeta }; },
+  };
+})();

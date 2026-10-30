@@ -38,15 +38,26 @@
             <div style="font-size:0.75rem; color:var(--text-muted); margin-left: 1.5rem; margin-bottom: 0.5rem;">
                 Добавляет чуть больше реагентов, чтобы компенсировать потери при смешивании и получить нужный объем гарантированно.
             </div>
+
+            <hr style="border:0; border-top:1px solid var(--border); margin: 1.5rem 0;">
+
+            <label>Источник данных</label>
+            <div id="dataStatus" class="data-status-wrap"></div>
+            <button id="refreshBtn" type="button" class="refresh-btn" title="Загрузить свежие данные из репозитория fish-station">↻ Обновить данные</button>
+            <div style="font-size:0.7rem; color:var(--text-muted); margin-top:0.4rem; line-height:1.4;">
+                Рецепты автоматически загружаются из<br>
+                <a href="https://github.com/makura-games/fish-station" target="_blank" style="color:var(--accent)">github.com/makura-games/fish-station</a>
+            </div>
         </section>
 
         <section class="results" id="resultsArea">
             <div style="text-align:center; padding: 3rem; color: var(--text-muted);">
-                Загрузка данных...
+                Загрузка данных…
             </div>
         </section>
     </main>
 
+    <script src="fs-parser.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
